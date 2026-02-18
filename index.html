@@ -1,11 +1,88 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Banka Paneli</title>
   <meta charset="UTF-8">
+  <title>Banka Paneli</title>
+  <style>
+    body{
+      font-family: Arial;
+      background: linear-gradient(135deg,#1e3c72,#2a5298);
+      color:white;
+      text-align:center;
+      padding:50px;
+    }
+
+    .panel{
+      background:white;
+      color:black;
+      padding:20px;
+      border-radius:15px;
+      width:300px;
+      margin:auto;
+      box-shadow:0 0 20px rgba(0,0,0,0.3);
+    }
+
+    button{
+      background:#2a5298;
+      color:white;
+      border:none;
+      padding:10px;
+      margin:5px;
+      width:100%;
+      border-radius:10px;
+      cursor:pointer;
+      transition:0.3s;
+    }
+
+    button:hover{
+      transform:scale(1.1);
+      background:#1e3c72;
+    }
+
+    input{
+      padding:8px;
+      margin:5px;
+      width:90%;
+    }
+  </style>
 </head>
+
 <body>
-  <h1>Banka Sistemine Hoşgeldiniz</h1>
-  <p>Sistem aktif.</p>
+
+<h1>💳 Banka Sistemi</h1>
+
+<div class="panel">
+
+<h3>Bakiye: <span id="money">1000</span> ₺</h3>
+
+<input id="amount" placeholder="Miktar gir">
+
+<button onclick="deposit()">Para Yatır</button>
+<button onclick="withdraw()">Para Çek</button>
+
+</div>
+
+<script>
+let money = 1000;
+
+function deposit(){
+  let a = Number(document.getElementById("amount").value);
+  money += a;
+  update();
+}
+
+function withdraw(){
+  let a = Number(document.getElementById("amount").value);
+  if(a <= money){
+    money -= a;
+  }
+  update();
+}
+
+function update(){
+  document.getElementById("money").innerText = money;
+}
+</script>
+
 </body>
 </html>
