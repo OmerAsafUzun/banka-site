@@ -5,60 +5,62 @@
 <title>GameMarket</title>
 <style>
 body{
-font-family:Arial;
-background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-color:white;
-text-align:center;
-padding:20px;
-position:relative;
+  font-family:Arial;
+  background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+  color:white;
+  text-align:center;
+  padding:20px;
+  position:relative;
 }
 .card{
-background:white;
-color:black;
-padding:20px;
-margin:15px auto;
-border-radius:15px;
-width:360px;
-box-shadow:0 0 20px rgba(0,0,0,0.4);
+  background:white;
+  color:black;
+  padding:20px;
+  margin:15px auto;
+  border-radius:15px;
+  width:360px;
+  box-shadow:0 0 20px rgba(0,0,0,0.4);
 }
 button{
-padding:10px;
-margin:5px;
-width:100%;
-border:none;
-border-radius:10px;
-background:#203a43;
-color:white;
-cursor:pointer;
-transition:0.3s;
+  padding:10px;
+  margin:5px;
+  width:100%;
+  border:none;
+  border-radius:10px;
+  background:#203a43;
+  color:white;
+  cursor:pointer;
+  transition:0.3s;
 }
 button:hover{
-transform:scale(1.05);
-background:#0f2027;
+  transform:scale(1.05);
+  background:#0f2027;
 }
 input{
-padding:8px;
-margin:5px;
-width:90%;
+  padding:8px;
+  margin:5px;
+  width:90%;
 }
 img{
-width:100%;
-border-radius:10px;
-margin-top:10px;
+  width:100%;
+  border-radius:10px;
+  margin-top:10px;
 }
 .version{
-position:fixed;
-bottom:5px;
-right:10px;
-color:white;
-opacity:0.6;
-font-size:12px;
+  position:fixed;
+  bottom:5px;
+  right:10px;
+  color:white;
+  opacity:0.6;
+  font-size:12px;
 }
 </style>
 </head>
 <body>
+
 <h1>🎮 GameMarket</h1>
 
+<!-- LOGIN / REGISTER -->
 <div class="card" id="loginPanel">
 <h3>Giriş</h3>
 <input id="loginId" placeholder="ID">
@@ -71,17 +73,21 @@ font-size:12px;
 <button onclick="register()">Hesap Oluştur</button>
 </div>
 
+<!-- USER PANEL -->
 <div class="card" id="userPanel" style="display:none">
 <h3>Bakiye: <span id="balance">0</span> Para</h3>
 
 <h3>MARKET</h3>
 
-<img src="3902a7d5-ebe7-4433-98aa-c899531fe744.png" alt="PetSim Huge">
+<!-- PetSim Huge -->
+<img src="file_000000001b0472439eed7261a8bd54af.png" alt="PetSim Huge">
 <button onclick="buy('petsim',15)">PetSim Huge (15 Para)</button>
 
+<!-- Valorant VP -->
 <img src="file_000000005a04720aa03bd8a82a7571f1.png" alt="Valorant VP">
 <button onclick="buy('vp',20)">Valorant 1000 VP (20 Para)</button>
 
+<!-- Fortnite V-Bucks -->
 <img src="file_00000000a448720a9dc089db63d848b7.png" alt="Fortnite V-Bucks">
 <button onclick="buy('fortnite',20)">Fortnite 1000 V-Bucks (20 Para)</button>
 
@@ -90,6 +96,7 @@ font-size:12px;
 <button onclick="logout()">Çıkış</button>
 </div>
 
+<!-- ADMIN PANEL -->
 <div class="card" id="adminPanel" style="display:none">
 <h2>👑 ADMIN</h2>
 
@@ -98,92 +105,108 @@ font-size:12px;
 <input id="giveAmount" placeholder="Miktar">
 <button onclick="giveMoney()">Para Ver</button>
 
+<h3>Siparişleri Gör</h3>
 <button onclick="showOrders()">Siparişleri Gör</button>
-
 <div id="orderList"></div>
 </div>
 
-<div class="version">Sürüm: w1.0</div>
+<div class="version">Sürüm: w1.1</div>
 
 <script>
 let users = JSON.parse(localStorage.getItem("users")) || {};
 let orders = JSON.parse(localStorage.getItem("orders")) || [];
 
+// Admin hesabı
 if(!users["9999"]){
-users["9999"] = {pass:"admin",balance:100000};
-saveUsers();
+  users["9999"] = {pass:"admin",balance:100000};
+  saveUsers();
 }
 
 let currentUser=null;
 
+// LOCAL STORAGE SAVE
 function saveUsers(){ localStorage.setItem("users",JSON.stringify(users)); }
 function saveOrders(){ localStorage.setItem("orders",JSON.stringify(orders)); }
 
+// REGISTER
 function register(){
-let id=regId.value;
-let pass=regPass.value;
-if(users[id]) return alert("Bu ID zaten var");
-users[id]={pass:pass,balance:0};
-saveUsers();
-alert("Kayıt tamamlandı");
+  let id=regId.value;
+  let pass=regPass.value;
+  if(users[id]) return alert("Bu ID zaten var");
+  users[id]={pass:pass,balance:0};
+  saveUsers();
+  alert("Kayıt tamamlandı");
 }
 
+// LOGIN
 function login(){
-let id=loginId.value;
-let pass=loginPass.value;
-if(!users[id] || users[id].pass!==pass) return alert("Hatalı giriş");
-currentUser=id;
-loginPanel.style.display="none";
-if(id==="9999"){ adminPanel.style.display="block"; } 
-else{ userPanel.style.display="block"; updateBalance(); }
+  let id=loginId.value;
+  let pass=loginPass.value;
+  if(!users[id] || users[id].pass!==pass) return alert("Hatalı giriş");
+  currentUser=id;
+  loginPanel.style.display="none";
+  if(id==="9999"){ 
+    adminPanel.style.display="block"; 
+  } else { 
+    userPanel.style.display="block"; 
+    updateBalance(); 
+  }
 }
 
-function updateBalance(){ balance.innerText=users[currentUser].balance; saveUsers(); }
+// UPDATE BALANCE
+function updateBalance(){ 
+  balance.innerText=users[currentUser].balance; 
+  saveUsers(); 
+}
 
+// BUY FUNCTION
 function buy(type,price){
-let p = buyPass.value;
-if(users[currentUser].pass!==p) return alert("Şifre yanlış");
-if(users[currentUser].balance<price) return alert("Yetersiz bakiye");
+  let p = buyPass.value;
+  if(users[currentUser].pass!==p) return alert("Şifre yanlış");
+  if(users[currentUser].balance<price) return alert("Yetersiz bakiye");
 
-let oyunAdi="";
-if(type==="petsim"){ 
-oyunAdi=prompt("HUGE için arkadaş eklemek üzere adınızı girin:"); 
-if(!oyunAdi) return;
-}
-if(type==="vp"){ 
-oyunAdi=prompt("Valorant kullanıcı adınızı girin:"); 
-if(!oyunAdi) return;
-}
-if(type==="fortnite"){ 
-oyunAdi=prompt("Fortnite kullanıcı adınızı girin:"); 
-if(!oyunAdi) return;
+  let oyunAdi="";
+  if(type==="petsim"){ 
+    oyunAdi = prompt("PetSim için adınızı girin (Roblox arkadaş eklemek için):"); 
+    if(!oyunAdi) return; 
+  }
+  if(type==="vp"){ 
+    oyunAdi = prompt("Valorant kullanıcı adınızı gir:"); 
+    if(!oyunAdi) return; 
+  }
+  if(type==="fortnite"){ 
+    oyunAdi = prompt("Fortnite kullanıcı adınızı gir:"); 
+    if(!oyunAdi) return; 
+  }
+
+  orders.push({user:currentUser,urun:type,oyunAdi:oyunAdi});
+  saveOrders();
+
+  users[currentUser].balance -= price;
+  updateBalance();
+  alert("Sipariş alındı");
 }
 
-orders.push({user:currentUser,urun:type,oyunAdi:oyunAdi});
-saveOrders();
-
-users[currentUser].balance-=price;
-updateBalance();
-alert("Sipariş alındı");
-}
-
+// GIVE MONEY
 function giveMoney(){
-let to=giveTo.value;
-let a=Number(giveAmount.value);
-if(!users[to]) return;
-users[to].balance+=a;
-saveUsers();
-alert("Para verildi");
+  let to=giveTo.value;
+  let a=Number(giveAmount.value);
+  if(!users[to]) return;
+  users[to].balance+=a;
+  saveUsers();
+  alert("Para verildi");
 }
 
+// SHOW ORDERS
 function showOrders(){
-let text="";
-orders.forEach(o=>{
-text += "Kullanıcı: "+o.user+" | Ürün: "+o.urun+" | Kullanıcı Adı: "+o.oyunAdi+"<br>";
-});
-orderList.innerHTML=text;
+  let text="";
+  orders.forEach(o=>{
+    text += "Kullanıcı: "+o.user+" | Ürün: "+o.urun+" | Kullanıcı Adı: "+o.oyunAdi+"<br>";
+  });
+  orderList.innerHTML=text;
 }
 
+// LOGOUT
 function logout(){ location.reload(); }
 </script>
 
