@@ -2,15 +2,15 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Banka Paneli</title>
+<title>Banka Sistemi</title>
 
 <style>
 body{
-font-family: Arial;
-background: linear-gradient(135deg,#1e3c72,#2a5298);
-color:white;
+font-family:Arial;
+background:linear-gradient(135deg,#1e3c72,#2a5298);
 text-align:center;
-padding:50px;
+color:white;
+padding:40px;
 }
 
 .panel{
@@ -20,7 +20,7 @@ padding:20px;
 border-radius:15px;
 width:320px;
 margin:auto;
-box-shadow:0 0 20px rgba(0,0,0,0.3);
+margin-top:15px;
 }
 
 button{
@@ -32,12 +32,6 @@ margin:5px;
 width:100%;
 border-radius:10px;
 cursor:pointer;
-transition:0.3s;
-}
-
-button:hover{
-transform:scale(1.1);
-background:#1e3c72;
 }
 
 input{
@@ -52,47 +46,145 @@ width:90%;
 
 <h1>💳 Banka Sistemi</h1>
 
-<div class="panel">
+<div class="panel" id="login">
+<h3>Giriş Yap</h3>
+<input id="user" placeholder="Kullanıcı adı">
+<input id="pass" type="password" placeholder="Şifre">
+<button onclick="login()">Giriş</button>
+<button onclick="register()">Hesap Oluştur</button>
+<p id="msg"></p>
+</div>
 
-<h3>Bakiye: <span id="money">1000</span> ₺</h3>
+<div class="panel" id="bank" style="display:none">
+<h3>Bakiye: <span id="money">0</span> ₺</h3>
 
-<input id="amount" placeholder="Miktar gir">
+<input id="amount" placeholder="Miktar">
 
 <button onclick="deposit()">Para Yatır</button>
 <button onclick="withdraw()">Para Çek</button>
 <button onclick="send()">Para Gönder</button>
+<button onclick="logout()">Çıkış</button>
+</div>
 
+<div class="panel" id="admin" style="display:none">
+<h3>👑 Admin Panel</h3>
+<div id="users"></div>
 </div>
 
 <script>
-let money = 1000;
+
+let currentUser = null;
+
+function getUsers(){
+return JSON.parse(localStorage.getItem("users")) || {};
+}
+
+function saveUsers(u){
+localStorage.setItem("users", JSON.stringify(u));
+}
+
+function register(){
+let u = document.getElementById("user").value;
+let p = document.getElementById("pass").value;
+
+let users = getUsers();
+
+if(users[u]){
+msg("Bu kullanıcı var");
+return;
+}
+
+users[u] = {pass:p, money:1000};
+saveUsers(users);
+msg("Hesap oluşturuldu");
+}
+
+function login(){
+let u = document.getElementById("user").value;
+let p = document.getElementById("pass").value;
+
+let users = getUsers();
+
+if(!users[u] || users[u].pass !== p){
+msg("Hatalı giriş");
+return;
+}
+
+currentUser = u;
+
+if(u === "admin" && p === "9999"){
+showAdmin();
+return;
+}
+
+showBank();
+}
+
+function showBank(){
+document.getElementById("login").style.display="none";
+document.getElementById("bank").style.display="block";
+update();
+}
+
+function showAdmin(){
+document.getElementById("login").style.display="none";
+document.getElementById("admin").style.display="block";
+
+let users = getUsers();
+let html = "";
+
+for(let u in users){
+html += u + " : " + users[u].money + " ₺<br>";
+}
+
+document.getElementById("users").innerHTML = html;
+}
+
+function update(){
+let users = getUsers();
+document.getElementById("money").innerText = users[currentUser].money;
+}
 
 function deposit(){
 let a = Number(document.getElementById("amount").value);
-money += a;
+let users = getUsers();
+users[currentUser].money += a;
+saveUsers(users);
 update();
 }
 
 function withdraw(){
 let a = Number(document.getElementById("amount").value);
-if(a <= money){
-money -= a;
+let users = getUsers();
+if(a <= users[currentUser].money){
+users[currentUser].money -= a;
 }
+saveUsers(users);
 update();
 }
 
 function send(){
+let target = prompt("Gönderilecek kullanıcı:");
 let a = Number(document.getElementById("amount").value);
-if(a <= money){
-money -= a;
-alert("Para gönderildi");
-}
+let users = getUsers();
+
+if(users[target] && a <= users[currentUser].money){
+users[currentUser].money -= a;
+users[target].money += a;
+saveUsers(users);
 update();
+alert("Gönderildi");
+}
 }
 
-function update(){
-document.getElementById("money").innerText = money;
+function logout(){
+location.reload();
 }
+
+function msg(t){
+document.getElementById("msg").innerText=t;
+}
+
 </script>
 
 </body>
