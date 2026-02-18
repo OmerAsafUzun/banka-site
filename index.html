@@ -2,167 +2,217 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Dijital Banka</title>
+<title>Banka</title>
 
 <style>
-body {
-    margin:0;
-    font-family:Arial;
-    background: linear-gradient(135deg,#141e30,#243b55);
-    height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
+body{
+font-family:Arial;
+background:linear-gradient(135deg,#1e3c72,#2a5298);
+color:white;
+text-align:center;
+padding:30px;
 }
 
-.card {
-    background: rgba(255,255,255,0.1);
-    backdrop-filter: blur(15px);
-    padding:40px;
-    border-radius:20px;
-    box-shadow:0 0 40px rgba(0,0,0,0.5);
-    text-align:center;
-    width:300px;
-    animation:fade 1s;
+.card{
+background:white;
+color:black;
+padding:20px;
+margin:10px auto;
+border-radius:15px;
+width:300px;
+box-shadow:0 0 20px rgba(0,0,0,0.3);
 }
 
-@keyframes fade {
-from{opacity:0; transform:translateY(30px);}
-to{opacity:1; transform:translateY(0);}
+button{
+padding:10px;
+margin:5px;
+width:100%;
+border:none;
+border-radius:10px;
+background:#2a5298;
+color:white;
+cursor:pointer;
+transition:0.3s;
 }
 
-input {
-    width:100%;
-    padding:10px;
-    margin:10px 0;
-    border:none;
-    border-radius:10px;
+button:hover{
+transform:scale(1.05);
+background:#1e3c72;
 }
 
-button {
-    width:100%;
-    padding:10px;
-    border:none;
-    border-radius:20px;
-    background:linear-gradient(90deg,#00c6ff,#0072ff);
-    color:white;
-    cursor:pointer;
-    transition:0.3s;
+input{
+padding:8px;
+margin:5px;
+width:90%;
 }
-
-button:hover {
-    transform:scale(1.05);
-}
-
-.panel { display:none; }
 </style>
 </head>
 
 <body>
 
-<div class="card" id="loginCard">
+<h1>🏦 Banka Sistemi</h1>
 
-<h2>Dijital Banka</h2>
+<div class="card" id="loginPanel">
+<h3>Giriş Yap</h3>
+<input id="loginId" placeholder="ID">
+<input id="loginPass" placeholder="Şifre">
+<button onclick="login()">Giriş</button>
 
 <h3>Kayıt Ol</h3>
-<input id="regUser" placeholder="Kullanıcı ID">
+<input id="regId" placeholder="Yeni ID">
 <input id="regPass" placeholder="Şifre">
-<button onclick="register()">Kayıt Ol</button>
-
-<h3>Giriş Yap</h3>
-<input id="loginUser" placeholder="Kullanıcı ID">
-<input id="loginPass" placeholder="Şifre">
-<button onclick="login()">Giriş Yap</button>
-
+<button onclick="register()">Hesap Oluştur</button>
 </div>
 
-<div class="card panel" id="userPanel">
-<h2>Hesabım</h2>
-<p>Bakiye: <span id="balance">0</span> TL</p>
+<div class="card" id="userPanel" style="display:none">
+<h3>Bakiye: <span id="balance">0</span> TL</h3>
 
+<input id="amount" placeholder="Miktar">
+
+<button onclick="deposit()">Para Yatır</button>
+<button onclick="withdraw()">Para Çek</button>
+
+<h3>Para Gönder</h3>
 <input id="sendTo" placeholder="Gönderilecek ID">
-<input id="amountInput" placeholder="Miktar">
-<button onclick="sendMoney()">Para Gönder</button>
+<input id="sendAmount" placeholder="Miktar">
+<button onclick="send()">Gönder</button>
+
+<button onclick="logout()">Çıkış</button>
 </div>
 
-<div class="card panel" id="adminPanel">
-<h2>Admin Panel</h2>
-<button onclick="showUsers()">Kullanıcıları Göster</button>
-<button onclick="deleteAll()">Tümünü Sil</button>
-<p id="userList"></p>
+<div class="card" id="adminPanel" style="display:none">
+<h2>👑 ADMIN PANEL</h2>
+
+<button onclick="showUsers()">Tüm Hesapları Göster</button>
+<button onclick="deleteAll()">Herkesi Sil</button>
+
+<h3>Admin Para Gönder</h3>
+<input id="adminFrom" placeholder="Kimden ID">
+<input id="adminTo" placeholder="Kime ID">
+<input id="adminAmount" placeholder="Miktar">
+<button onclick="adminSend()">Admin Para Gönder</button>
+
+<div id="userList"></div>
 </div>
 
 <script>
 
 let users = JSON.parse(localStorage.getItem("users")) || {};
+
+if(!users["9999"]){
+users["9999"] = {pass:"admin",balance:100000};
+saveUsers();
+}
+
 let currentUser=null;
 
 function saveUsers(){
-localStorage.setItem("users", JSON.stringify(users));
+localStorage.setItem("users",JSON.stringify(users));
 }
 
 function register(){
-let id=regUser.value;
+let id=regId.value;
 let pass=regPass.value;
 
-if(!id || !pass){ alert("Boş bırakma"); return;}
+if(users[id]){
+alert("Bu ID var");
+return;
+}
 
-if(users[id]){ alert("Bu kullanıcı var"); return;}
-
-users[id]={pass:pass,balance:1000};
+users[id]={pass:pass,balance:0};
 saveUsers();
 alert("Kayıt başarılı");
 }
 
 function login(){
-let id=loginUser.value;
+let id=loginId.value;
 let pass=loginPass.value;
 
-if(id=="9999" && pass=="admin"){
-loginCard.style.display="none";
-adminPanel.style.display="block";
-return;
-}
-
-if(!users[id] || users[id].pass!=pass){
+if(!users[id] || users[id].pass!==pass){
 alert("Hatalı giriş");
 return;
 }
 
 currentUser=id;
-loginCard.style.display="none";
+
+loginPanel.style.display="none";
+
+if(id==="9999" && pass==="admin"){
+adminPanel.style.display="block";
+}else{
 userPanel.style.display="block";
-balance.innerText=users[id].balance;
+updateBalance();
+}
 }
 
-function sendMoney(){
-let to=sendTo.value;
-let amount=Number(amountInput.value);
-
-if(!users[to]){alert("Kullanıcı yok");return;}
-if(users[currentUser].balance < amount){alert("Yetersiz bakiye");return;}
-
-users[currentUser].balance -= amount;
-users[to].balance += amount;
-saveUsers();
-
+function updateBalance(){
 balance.innerText=users[currentUser].balance;
-alert("Gönderildi");
+saveUsers();
+}
+
+function deposit(){
+let a=Number(amount.value);
+users[currentUser].balance+=a;
+updateBalance();
+}
+
+function withdraw(){
+let a=Number(amount.value);
+if(users[currentUser].balance>=a){
+users[currentUser].balance-=a;
+updateBalance();
+}
+}
+
+function send(){
+let to=sendTo.value;
+let a=Number(sendAmount.value);
+
+if(!users[to]){
+alert("Kullanıcı yok");
+return;
+}
+
+if(users[currentUser].balance<a){
+alert("Yetersiz");
+return;
+}
+
+users[currentUser].balance-=a;
+users[to].balance+=a;
+updateBalance();
+}
+
+function logout(){
+location.reload();
 }
 
 function showUsers(){
 let text="";
 for(let u in users){
-text += u+" - "+users[u].balance+" TL <br>";
+text+="ID:"+u+" | Şifre:"+users[u].pass+" | Bakiye:"+users[u].balance+" TL <br>";
 }
 userList.innerHTML=text;
 }
 
 function deleteAll(){
-users={};
-saveUsers();
-alert("Silindi");
+localStorage.clear();
 location.reload();
+}
+
+function adminSend(){
+let f=adminFrom.value;
+let t=adminTo.value;
+let a=Number(adminAmount.value);
+
+if(!users[f] || !users[t]) return;
+
+if(users[f].balance<a) return;
+
+users[f].balance-=a;
+users[t].balance+=a;
+saveUsers();
+alert("Gönderildi");
 }
 
 </script>
