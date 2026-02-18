@@ -76,13 +76,13 @@ font-size:12px;
 
 <h3>MARKET</h3>
 
-<img src="https://static.wikia.nocookie.net/roblox/images/7/7e/Pet_Simulator_99_Icon.png" alt="PetSim Huge">
+<img src="3902a7d5-ebe7-4433-98aa-c899531fe744.png" alt="PetSim Huge">
 <button onclick="buy('petsim',15)">PetSim Huge (15 Para)</button>
 
-<img src="https://static.wikia.nocookie.net/valorant/images/9/9c/Valorant_VP.png" alt="Valorant VP">
+<img src="file_000000005a04720aa03bd8a82a7571f1.png" alt="Valorant VP">
 <button onclick="buy('vp',20)">Valorant 1000 VP (20 Para)</button>
 
-<img src="https://cdn2.unrealengine.com/fortnite-vbucks-1920x1080-8a1a3f.png" alt="Fortnite V-Bucks">
+<img src="file_00000000a448720a9dc089db63d848b7.png" alt="Fortnite V-Bucks">
 <button onclick="buy('fortnite',20)">Fortnite 1000 V-Bucks (20 Para)</button>
 
 <input id="buyPass" placeholder="Şifren">
@@ -146,14 +146,17 @@ if(users[currentUser].pass!==p) return alert("Şifre yanlış");
 if(users[currentUser].balance<price) return alert("Yetersiz bakiye");
 
 let oyunAdi="";
-if(type==="petsim"){ oyunAdi="omer_a3"; }
+if(type==="petsim"){ 
+oyunAdi=prompt("HUGE için arkadaş eklemek üzere adınızı girin:"); 
+if(!oyunAdi) return;
+}
 if(type==="vp"){ 
-oyunAdi = prompt("Valorant kullanıcı adınızı gir:"); 
-if(!oyunAdi) return; 
+oyunAdi=prompt("Valorant kullanıcı adınızı girin:"); 
+if(!oyunAdi) return;
 }
 if(type==="fortnite"){ 
-oyunAdi = prompt("Fortnite kullanıcı adınızı gir:"); 
-if(!oyunAdi) return; 
+oyunAdi=prompt("Fortnite kullanıcı adınızı girin:"); 
+if(!oyunAdi) return;
 }
 
 orders.push({user:currentUser,urun:type,oyunAdi:oyunAdi});
