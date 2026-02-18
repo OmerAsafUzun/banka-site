@@ -10,16 +10,16 @@ font-family:Arial;
 background:linear-gradient(135deg,#1e3c72,#2a5298);
 color:white;
 text-align:center;
-padding:30px;
+padding:20px;
 }
 
 .card{
 background:white;
 color:black;
 padding:20px;
-margin:10px auto;
+margin:15px auto;
 border-radius:15px;
-width:300px;
+width:330px;
 box-shadow:0 0 20px rgba(0,0,0,0.3);
 }
 
@@ -50,15 +50,15 @@ width:90%;
 
 <body>
 
-<h1>🏦 Banka Sistemi</h1>
+<h1>🏦 Banka</h1>
 
 <div class="card" id="loginPanel">
-<h3>Giriş Yap</h3>
+<h3>Giriş</h3>
 <input id="loginId" placeholder="ID">
 <input id="loginPass" placeholder="Şifre">
 <button onclick="login()">Giriş</button>
 
-<h3>Kayıt Ol</h3>
+<h3>Kayıt</h3>
 <input id="regId" placeholder="Yeni ID">
 <input id="regPass" placeholder="Şifre">
 <button onclick="register()">Hesap Oluştur</button>
@@ -67,37 +67,43 @@ width:90%;
 <div class="card" id="userPanel" style="display:none">
 <h3>Bakiye: <span id="balance">0</span> TL</h3>
 
-<input id="amount" placeholder="Miktar">
-
-<button onclick="deposit()">Para Yatır</button>
-<button onclick="withdraw()">Para Çek</button>
-
 <h3>Para Gönder</h3>
-<input id="sendTo" placeholder="Gönderilecek ID">
+<input id="sendTo" placeholder="ID">
 <input id="sendAmount" placeholder="Miktar">
+<input id="sendPass" placeholder="Şifren">
 <button onclick="send()">Gönder</button>
+
+<h3>MARKET</h3>
+
+<button onclick="buy('petsim',15)">🐱 PetSim Huge (15 TL)</button>
+<button onclick="buy('vp',20)">🔫 Valorant 1000 VP (20 TL)</button>
+<button onclick="buy('fortnite',20)">🟢 Fortnite 1000 Vpapel (20 TL)</button>
+
+<input id="buyPass" placeholder="Şifren">
 
 <button onclick="logout()">Çıkış</button>
 </div>
 
 <div class="card" id="adminPanel" style="display:none">
-<h2>👑 ADMIN PANEL</h2>
+<h2>👑 ADMIN</h2>
 
-<button onclick="showUsers()">Tüm Hesapları Göster</button>
+<h3>Para Ver</h3>
+<input id="giveTo" placeholder="ID">
+<input id="giveAmount" placeholder="Miktar">
+<button onclick="giveMoney()">Para Ver</button>
+
+<button onclick="showUsers()">Hesapları Gör</button>
+<button onclick="showOrders()">Siparişleri Gör</button>
 <button onclick="deleteAll()">Herkesi Sil</button>
 
-<h3>Admin Para Gönder</h3>
-<input id="adminFrom" placeholder="Kimden ID">
-<input id="adminTo" placeholder="Kime ID">
-<input id="adminAmount" placeholder="Miktar">
-<button onclick="adminSend()">Admin Para Gönder</button>
-
 <div id="userList"></div>
+<div id="orderList"></div>
 </div>
 
 <script>
 
 let users = JSON.parse(localStorage.getItem("users")) || {};
+let orders = JSON.parse(localStorage.getItem("orders")) || {};
 
 if(!users["9999"]){
 users["9999"] = {pass:"admin",balance:100000};
@@ -110,34 +116,28 @@ function saveUsers(){
 localStorage.setItem("users",JSON.stringify(users));
 }
 
+function saveOrders(){
+localStorage.setItem("orders",JSON.stringify(orders));
+}
+
 function register(){
 let id=regId.value;
 let pass=regPass.value;
-
-if(users[id]){
-alert("Bu ID var");
-return;
-}
-
+if(users[id]) return alert("Var");
 users[id]={pass:pass,balance:0};
 saveUsers();
-alert("Kayıt başarılı");
+alert("Kayıt tamam");
 }
 
 function login(){
 let id=loginId.value;
 let pass=loginPass.value;
-
-if(!users[id] || users[id].pass!==pass){
-alert("Hatalı giriş");
-return;
-}
+if(!users[id] || users[id].pass!==pass) return alert("Hatalı");
 
 currentUser=id;
-
 loginPanel.style.display="none";
 
-if(id==="9999" && pass==="admin"){
+if(id==="9999"){
 adminPanel.style.display="block";
 }else{
 userPanel.style.display="block";
@@ -150,49 +150,83 @@ balance.innerText=users[currentUser].balance;
 saveUsers();
 }
 
-function deposit(){
-let a=Number(amount.value);
-users[currentUser].balance+=a;
-updateBalance();
-}
-
-function withdraw(){
-let a=Number(amount.value);
-if(users[currentUser].balance>=a){
-users[currentUser].balance-=a;
-updateBalance();
-}
-}
-
 function send(){
 let to=sendTo.value;
 let a=Number(sendAmount.value);
+let p=sendPass.value;
 
-if(!users[to]){
-alert("Kullanıcı yok");
-return;
-}
-
-if(users[currentUser].balance<a){
-alert("Yetersiz");
-return;
-}
+if(users[currentUser].pass!==p) return alert("Şifre yanlış");
+if(!users[to]) return alert("Kullanıcı yok");
+if(users[currentUser].balance<a) return alert("Yetersiz");
 
 users[currentUser].balance-=a;
 users[to].balance+=a;
 updateBalance();
 }
 
-function logout(){
-location.reload();
+function buy(type,price){
+
+let p = buyPass.value;
+
+if(users[currentUser].pass!==p) return alert("Şifre yanlış");
+if(users[currentUser].balance<price) return alert("Para yok");
+
+let name="";
+
+if(type==="petsim"){
+name="omer_a3";
+}
+
+if(type==="vp"){
+name = prompt("Valorant adını gir");
+if(!name) return;
+}
+
+if(type==="fortnite"){
+name = prompt("Fortnite adını gir");
+if(!name) return;
+}
+
+orders.push({
+user: currentUser,
+urun: type,
+oyunAdi: name
+});
+
+saveOrders();
+
+users[currentUser].balance-=price;
+updateBalance();
+
+alert("Sipariş alındı");
+}
+
+function giveMoney(){
+let to=giveTo.value;
+let a=Number(giveAmount.value);
+if(!users[to]) return;
+
+users[to].balance+=a;
+saveUsers();
+alert("Para verildi");
 }
 
 function showUsers(){
 let text="";
 for(let u in users){
-text+="ID:"+u+" | Şifre:"+users[u].pass+" | Bakiye:"+users[u].balance+" TL <br>";
+text+="ID:"+u+" | Şifre:"+users[u].pass+" | Bakiye:"+users[u].balance+"<br>";
 }
 userList.innerHTML=text;
+}
+
+function showOrders(){
+let text="";
+orders.forEach(o=>{
+text += "Kullanıcı: "+o.user+
+" | Ürün: "+o.urun+
+" | Oyun Adı: "+o.oyunAdi+"<br>";
+});
+orderList.innerHTML=text;
 }
 
 function deleteAll(){
@@ -200,19 +234,8 @@ localStorage.clear();
 location.reload();
 }
 
-function adminSend(){
-let f=adminFrom.value;
-let t=adminTo.value;
-let a=Number(adminAmount.value);
-
-if(!users[f] || !users[t]) return;
-
-if(users[f].balance<a) return;
-
-users[f].balance-=a;
-users[t].balance+=a;
-saveUsers();
-alert("Gönderildi");
+function logout(){
+location.reload();
 }
 
 </script>
