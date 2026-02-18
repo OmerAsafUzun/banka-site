@@ -4,198 +4,47 @@
 <meta charset="UTF-8">
 <title>Banka</title>
 <style>
-body{
-font-family:Arial;
-background:linear-gradient(135deg,#1e3c72,#2a5298);
-text-align:center;
-color:white;
-padding:40px;
-}
-.panel{
-background:white;
-color:black;
-padding:20px;
-border-radius:15px;
-width:350px;
-margin:auto;
-margin-top:15px;
-}
-button{
-background:#2a5298;
-color:white;
-border:none;
-padding:8px;
-margin:3px;
-border-radius:10px;
-cursor:pointer;
-}
-input{
-padding:8px;
-margin:5px;
-width:90%;
-}
+body{font-family:Arial;background:#1e3c72;color:white;text-align:center;padding:40px;}
+.panel{background:white;color:black;padding:20px;border-radius:15px;width:300px;margin:auto;}
+button{padding:10px;margin:5px;width:100%;}
 </style>
 </head>
 
 <body>
 
-<h1>💳 Banka</h1>
+<h1>Banka</h1>
 
 <div class="panel" id="login">
-<input id="user" placeholder="Kullanıcı adı">
+<input id="user" placeholder="Kullanıcı">
 <input id="pass" type="password" placeholder="Şifre">
 <button onclick="login()">Giriş</button>
-<button onclick="register()">Hesap Oluştur</button>
-<p id="msg"></p>
-</div>
-
-<div class="panel" id="bank" style="display:none">
-<h3>Bakiye: <span id="money">0</span> ₺</h3>
-<input id="amount" placeholder="Miktar">
-<button onclick="deposit()">Para Yatır</button>
-<button onclick="withdraw()">Para Çek</button>
-<button onclick="logout()">Çıkış</button>
 </div>
 
 <div class="panel" id="admin" style="display:none">
-<h3>👑 Admin Panel</h3>
-<div id="users"></div>
-<button onclick="logout()">Çıkış</button>
+<h2>ADMIN PANEL</h2>
+<p>Tüm kullanıcıları kontrol edebilirsin</p>
 </div>
 
 <script>
 
-let currentUser = null;
-
-function getUsers(){
-let users = JSON.parse(localStorage.getItem("users")) || {};
-
-// OTOMATİK ADMIN OLUŞTUR
-if(!users["admin"]){
-users["admin"] = {pass:"9999", money:999999};
-localStorage.setItem("users", JSON.stringify(users));
-}
-
-return users;
-}
-
-function saveUsers(u){
-localStorage.setItem("users", JSON.stringify(u));
-}
-
-function register(){
-let u = user.value;
-let p = pass.value;
-let users = getUsers();
-
-if(users[u]){
-msg("Bu kullanıcı var");
-return;
-}
-
-users[u] = {pass:p, money:1000};
-saveUsers(users);
-msg("Hesap oluşturuldu");
-}
+// ADMINI ZORLA OLUŞTUR
+localStorage.setItem("users", JSON.stringify({
+admin:{pass:"9999", money:999999}
+}));
 
 function login(){
+
+let users = JSON.parse(localStorage.getItem("users"));
 let u = user.value;
 let p = pass.value;
-let users = getUsers();
 
-if(!users[u] || users[u].pass !== p){
-msg("Hatalı giriş");
-return;
-}
-
-currentUser = u;
-
-if(u === "admin"){
-showAdmin();
-}else{
-showBank();
-}
-}
-
-function showBank(){
-login.style.display="none";
-bank.style.display="block";
-update();
-}
-
-function showAdmin(){
+if(users[u] && users[u].pass === p){
 login.style.display="none";
 admin.style.display="block";
-renderUsers();
+}else{
+alert("Hatalı");
 }
 
-function renderUsers(){
-let users = getUsers();
-let html = "";
-
-for(let u in users){
-html += `
-<b>${u}</b> : ${users[u].money} ₺ 
-<button onclick="addMoney('${u}')">+100</button>
-<button onclick="removeMoney('${u}')">-100</button>
-<button onclick="deleteUser('${u}')">Sil</button>
-<br><br>
-`;
-}
-
-usersDiv.innerHTML = html;
-}
-
-function addMoney(u){
-let users = getUsers();
-users[u].money += 100;
-saveUsers(users);
-renderUsers();
-}
-
-function removeMoney(u){
-let users = getUsers();
-users[u].money -= 100;
-saveUsers(users);
-renderUsers();
-}
-
-function deleteUser(u){
-let users = getUsers();
-delete users[u];
-saveUsers(users);
-renderUsers();
-}
-
-function update(){
-let users = getUsers();
-money.innerText = users[currentUser].money;
-}
-
-function deposit(){
-let a = Number(amount.value);
-let users = getUsers();
-users[currentUser].money += a;
-saveUsers(users);
-update();
-}
-
-function withdraw(){
-let a = Number(amount.value);
-let users = getUsers();
-if(a <= users[currentUser].money){
-users[currentUser].money -= a;
-}
-saveUsers(users);
-update();
-}
-
-function logout(){
-location.reload();
-}
-
-function msg(t){
-msg.innerText=t;
 }
 
 </script>
