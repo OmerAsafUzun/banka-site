@@ -18,7 +18,7 @@ background:white;
 color:black;
 padding:20px;
 border-radius:15px;
-width:320px;
+width:350px;
 margin:auto;
 margin-top:15px;
 }
@@ -27,9 +27,8 @@ button{
 background:#2a5298;
 color:white;
 border:none;
-padding:10px;
-margin:5px;
-width:100%;
+padding:8px;
+margin:3px;
 border-radius:10px;
 cursor:pointer;
 }
@@ -57,18 +56,16 @@ width:90%;
 
 <div class="panel" id="bank" style="display:none">
 <h3>Bakiye: <span id="money">0</span> ₺</h3>
-
 <input id="amount" placeholder="Miktar">
-
 <button onclick="deposit()">Para Yatır</button>
 <button onclick="withdraw()">Para Çek</button>
-<button onclick="send()">Para Gönder</button>
 <button onclick="logout()">Çıkış</button>
 </div>
 
 <div class="panel" id="admin" style="display:none">
 <h3>👑 Admin Panel</h3>
 <div id="users"></div>
+<button onclick="logout()">Çıkış</button>
 </div>
 
 <script>
@@ -129,15 +126,45 @@ update();
 function showAdmin(){
 document.getElementById("login").style.display="none";
 document.getElementById("admin").style.display="block";
+renderUsers();
+}
 
+function renderUsers(){
 let users = getUsers();
 let html = "";
 
 for(let u in users){
-html += u + " : " + users[u].money + " ₺<br>";
+html += `
+<b>${u}</b> : ${users[u].money} ₺ 
+<button onclick="addMoney('${u}')">+100</button>
+<button onclick="removeMoney('${u}')">-100</button>
+<button onclick="deleteUser('${u}')">Sil</button>
+<br><br>
+`;
 }
 
 document.getElementById("users").innerHTML = html;
+}
+
+function addMoney(u){
+let users = getUsers();
+users[u].money += 100;
+saveUsers(users);
+renderUsers();
+}
+
+function removeMoney(u){
+let users = getUsers();
+users[u].money -= 100;
+saveUsers(users);
+renderUsers();
+}
+
+function deleteUser(u){
+let users = getUsers();
+delete users[u];
+saveUsers(users);
+renderUsers();
 }
 
 function update(){
@@ -161,20 +188,6 @@ users[currentUser].money -= a;
 }
 saveUsers(users);
 update();
-}
-
-function send(){
-let target = prompt("Gönderilecek kullanıcı:");
-let a = Number(document.getElementById("amount").value);
-let users = getUsers();
-
-if(users[target] && a <= users[currentUser].money){
-users[currentUser].money -= a;
-users[target].money += a;
-saveUsers(users);
-update();
-alert("Gönderildi");
-}
 }
 
 function logout(){
