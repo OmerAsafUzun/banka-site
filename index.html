@@ -78,19 +78,22 @@ img{
 <h3 id="welcome"></h3>
 <h3>Bakiye: <span id="balance">0</span> Para</h3>
 
+<div id="market">
 <h3>MARKET</h3>
-
-<!-- Örnek Ürünler -->
-<img src="https://cdn.hesap.com.tr/cache/uploads/ilan_images/random-huge-pet-simulator-99-fsnt.webp">
-<button onclick="buy('petsim',15)">PetSim Huge (15 Para)</button>
+<img src="https://via.placeholder.com/300x150?text=Pet+Sim+Huge">
+<button onclick="buy('PetSim Huge',15)">PetSim Huge (15 Para)</button>
 
 <img src="https://via.placeholder.com/300x150?text=Valorant+VP">
-<button onclick="buy('valorant',25)">Valorant VP (25 Para)</button>
+<button onclick="buy('Valorant VP',25)">Valorant VP (25 Para)</button>
+</div>
 
 <!-- Admin Panel -->
 <div id="adminPanel" style="display:none; margin-top:20px; text-align:left;">
-<h3>Admin Paneli - Tüm Kullanıcılar</h3>
+<h3>Admin Paneli - Kullanıcılar</h3>
 <ul id="allUsers"></ul>
+<input id="addUserId" placeholder="Kullanıcı ID">
+<input id="addAmount" placeholder="Eklenecek Para" type="number">
+<button onclick="addBalance()">Para Gönder</button>
 </div>
 
 <button onclick="logout()">Çıkış</button>
@@ -134,10 +137,14 @@ function showUserPanel(){
   document.getElementById("welcome").innerText = `Hoşgeldin, ${currentUser.id}`;
   document.getElementById("balance").innerText = currentUser.balance;
 
-  // Admin ise paneli göster
-  if(currentUser.id === "w1.6"){
+  if(currentUser.id === "w1.8"){
+    // Admin
+    document.getElementById("market").style.display="none"; // marketi gizle
     document.getElementById("adminPanel").style.display="block";
     updateAdminPanel();
+  } else {
+    document.getElementById("market").style.display="block";
+    document.getElementById("adminPanel").style.display="none";
   }
 }
 
@@ -148,6 +155,18 @@ function updateAdminPanel(){
   for(let uid in users){
     list.innerHTML += `<li>${uid} - Bakiye: ${users[uid].balance}</li>`;
   }
+}
+
+// Admin para ekleme
+function addBalance(){
+  const uid = document.getElementById("addUserId").value;
+  const amount = parseInt(document.getElementById("addAmount").value);
+  if(users[uid] && amount > 0){
+    users[uid].balance += amount;
+    localStorage.setItem("users", JSON.stringify(users));
+    updateAdminPanel();
+    alert(uid + " kullanıcısına " + amount + " para eklendi!");
+  } else alert("Geçersiz ID veya miktar!");
 }
 
 // Market alışveriş
