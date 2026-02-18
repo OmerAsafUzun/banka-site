@@ -2,8 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Banka Sistemi</title>
-
+<title>Banka</title>
 <style>
 body{
 font-family:Arial;
@@ -12,7 +11,6 @@ text-align:center;
 color:white;
 padding:40px;
 }
-
 .panel{
 background:white;
 color:black;
@@ -22,7 +20,6 @@ width:350px;
 margin:auto;
 margin-top:15px;
 }
-
 button{
 background:#2a5298;
 color:white;
@@ -32,7 +29,6 @@ margin:3px;
 border-radius:10px;
 cursor:pointer;
 }
-
 input{
 padding:8px;
 margin:5px;
@@ -43,10 +39,9 @@ width:90%;
 
 <body>
 
-<h1>💳 Banka Sistemi</h1>
+<h1>💳 Banka</h1>
 
 <div class="panel" id="login">
-<h3>Giriş Yap</h3>
 <input id="user" placeholder="Kullanıcı adı">
 <input id="pass" type="password" placeholder="Şifre">
 <button onclick="login()">Giriş</button>
@@ -73,7 +68,15 @@ width:90%;
 let currentUser = null;
 
 function getUsers(){
-return JSON.parse(localStorage.getItem("users")) || {};
+let users = JSON.parse(localStorage.getItem("users")) || {};
+
+// OTOMATİK ADMIN OLUŞTUR
+if(!users["admin"]){
+users["admin"] = {pass:"9999", money:999999};
+localStorage.setItem("users", JSON.stringify(users));
+}
+
+return users;
 }
 
 function saveUsers(u){
@@ -81,9 +84,8 @@ localStorage.setItem("users", JSON.stringify(u));
 }
 
 function register(){
-let u = document.getElementById("user").value;
-let p = document.getElementById("pass").value;
-
+let u = user.value;
+let p = pass.value;
 let users = getUsers();
 
 if(users[u]){
@@ -97,9 +99,8 @@ msg("Hesap oluşturuldu");
 }
 
 function login(){
-let u = document.getElementById("user").value;
-let p = document.getElementById("pass").value;
-
+let u = user.value;
+let p = pass.value;
 let users = getUsers();
 
 if(!users[u] || users[u].pass !== p){
@@ -109,23 +110,22 @@ return;
 
 currentUser = u;
 
-if(u === "admin" && p === "9999"){
+if(u === "admin"){
 showAdmin();
-return;
-}
-
+}else{
 showBank();
+}
 }
 
 function showBank(){
-document.getElementById("login").style.display="none";
-document.getElementById("bank").style.display="block";
+login.style.display="none";
+bank.style.display="block";
 update();
 }
 
 function showAdmin(){
-document.getElementById("login").style.display="none";
-document.getElementById("admin").style.display="block";
+login.style.display="none";
+admin.style.display="block";
 renderUsers();
 }
 
@@ -143,7 +143,7 @@ html += `
 `;
 }
 
-document.getElementById("users").innerHTML = html;
+usersDiv.innerHTML = html;
 }
 
 function addMoney(u){
@@ -169,11 +169,11 @@ renderUsers();
 
 function update(){
 let users = getUsers();
-document.getElementById("money").innerText = users[currentUser].money;
+money.innerText = users[currentUser].money;
 }
 
 function deposit(){
-let a = Number(document.getElementById("amount").value);
+let a = Number(amount.value);
 let users = getUsers();
 users[currentUser].money += a;
 saveUsers(users);
@@ -181,7 +181,7 @@ update();
 }
 
 function withdraw(){
-let a = Number(document.getElementById("amount").value);
+let a = Number(amount.value);
 let users = getUsers();
 if(a <= users[currentUser].money){
 users[currentUser].money -= a;
@@ -195,7 +195,7 @@ location.reload();
 }
 
 function msg(t){
-document.getElementById("msg").innerText=t;
+msg.innerText=t;
 }
 
 </script>
