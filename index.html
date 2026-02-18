@@ -93,17 +93,14 @@ width:90%;
 <button onclick="giveMoney()">Para Ver</button>
 
 <button onclick="showUsers()">Hesapları Gör</button>
-<button onclick="showOrders()">Siparişleri Gör</button>
 <button onclick="deleteAll()">Herkesi Sil</button>
 
 <div id="userList"></div>
-<div id="orderList"></div>
 </div>
 
 <script>
 
 let users = JSON.parse(localStorage.getItem("users")) || {};
-let orders = JSON.parse(localStorage.getItem("orders")) || {};
 
 if(!users["9999"]){
 users["9999"] = {pass:"admin",balance:100000};
@@ -114,10 +111,6 @@ let currentUser=null;
 
 function saveUsers(){
 localStorage.setItem("users",JSON.stringify(users));
-}
-
-function saveOrders(){
-localStorage.setItem("orders",JSON.stringify(orders));
 }
 
 function register(){
@@ -165,40 +158,14 @@ updateBalance();
 }
 
 function buy(type,price){
-
-let p = buyPass.value;
+let p=buyPass.value;
 
 if(users[currentUser].pass!==p) return alert("Şifre yanlış");
 if(users[currentUser].balance<price) return alert("Para yok");
 
-let name="";
-
-if(type==="petsim"){
-name="omer_a3";
-}
-
-if(type==="vp"){
-name = prompt("Valorant adını gir");
-if(!name) return;
-}
-
-if(type==="fortnite"){
-name = prompt("Fortnite adını gir");
-if(!name) return;
-}
-
-orders.push({
-user: currentUser,
-urun: type,
-oyunAdi: name
-});
-
-saveOrders();
-
 users[currentUser].balance-=price;
 updateBalance();
-
-alert("Sipariş alındı");
+alert("Satın alındı");
 }
 
 function giveMoney(){
@@ -217,16 +184,6 @@ for(let u in users){
 text+="ID:"+u+" | Şifre:"+users[u].pass+" | Bakiye:"+users[u].balance+"<br>";
 }
 userList.innerHTML=text;
-}
-
-function showOrders(){
-let text="";
-orders.forEach(o=>{
-text += "Kullanıcı: "+o.user+
-" | Ürün: "+o.urun+
-" | Oyun Adı: "+o.oyunAdi+"<br>";
-});
-orderList.innerHTML=text;
 }
 
 function deleteAll(){
