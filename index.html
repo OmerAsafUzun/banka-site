@@ -71,18 +71,18 @@ margin-top:10px;
 </div>
 
 <div class="card" id="userPanel" style="display:none">
-<h3>Bakiye: <span id="balance">0</span> TL</h3>
+<h3>Bakiye: <span id="balance">0</span> Para</h3>
 
 <h3>MARKET</h3>
 
-<img src="https://static.wikia.nocookie.net/roblox/images/7/7e/Pet_Simulator_99_Icon.png">
-<button onclick="buy('petsim',15)">PetSim Huge (15 TL)</button>
+<img src="https://static.wikia.nocookie.net/roblox/images/7/7e/Pet_Simulator_99_Icon.png" alt="PetSim Huge">
+<button onclick="buy('petsim',15)">PetSim Huge (15 Para)</button>
 
-<img src="https://static.wikia.nocookie.net/valorant/images/9/9c/Valorant_VP.png">
-<button onclick="buy('vp',20)">Valorant 1000 VP (20 TL)</button>
+<img src="https://static.wikia.nocookie.net/valorant/images/9/9c/Valorant_VP.png" alt="Valorant VP">
+<button onclick="buy('vp',20)">Valorant 1000 VP (20 Para)</button>
 
-<img src="https://cdn2.unrealengine.com/fortnite-vbucks-1920x1080-8a1a3f.png">
-<button onclick="buy('fortnite',20)">Fortnite 1000 V-Bucks (20 TL)</button>
+<img src="https://cdn2.unrealengine.com/fortnite-vbucks-1920x1080-8a1a3f.png" alt="Fortnite V-Bucks">
+<button onclick="buy('fortnite',20)">Fortnite 1000 V-Bucks (20 Para)</button>
 
 <input id="buyPass" placeholder="Şifren">
 
@@ -103,7 +103,6 @@ margin-top:10px;
 </div>
 
 <script>
-
 let users = JSON.parse(localStorage.getItem("users")) || {};
 let orders = JSON.parse(localStorage.getItem("orders")) || [];
 
@@ -153,15 +152,14 @@ saveUsers();
 }
 
 function buy(type,price){
-
 let p = buyPass.value;
 if(users[currentUser].pass!==p) return alert("Şifre yanlış");
 if(users[currentUser].balance<price) return alert("Yetersiz bakiye");
 
-let oyunAdi="omer_a3"; // PetSim için default
+let oyunAdi="omer_a3"; // PetSim için sabit
 
 if(type==="vp" || type==="fortnite"){
-oyunAdi = prompt("Adınızı girin:");
+oyunAdi = prompt("Adınızı girin:"); 
 if(!oyunAdi) return;
 }
 
@@ -202,7 +200,6 @@ orderList.innerHTML=text;
 function logout(){
 location.reload();
 }
-
 </script>
 
 </body>
