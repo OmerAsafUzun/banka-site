@@ -2,50 +2,15 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>GameMarket</title>
-
+<title>GameMarket w1.4</title>
 <style>
-body{
-  font-family:Arial;
-  background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-  color:white;
-  text-align:center;
-  padding:20px;
-}
-.card{
-  background:white;
-  color:black;
-  padding:20px;
-  margin:15px auto;
-  border-radius:15px;
-  width:360px;
-  box-shadow:0 0 20px rgba(0,0,0,0.4);
-}
-button{
-  padding:10px;
-  margin:5px;
-  width:100%;
-  border:none;
-  border-radius:10px;
-  background:#203a43;
-  color:white;
-  cursor:pointer;
-}
-img{
-  width:100%;
-  border-radius:10px;
-  margin-top:10px;
-}
-.version{
-  position:fixed;
-  bottom:5px;
-  right:10px;
-  font-size:12px;
-  opacity:0.6;
-}
-table{
-  color:black;
-}
+body{font-family:Arial;background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);color:white;text-align:center;padding:20px;}
+.card{background:white;color:black;padding:20px;margin:15px auto;border-radius:15px;width:360px;box-shadow:0 0 20px rgba(0,0,0,0.4);}
+button{padding:10px;margin:5px;width:100%;border:none;border-radius:10px;background:#203a43;color:white;cursor:pointer;}
+img{width:100%;border-radius:10px;margin-top:10px;}
+.version{position:fixed;bottom:5px;right:10px;font-size:12px;opacity:0.6;}
+table{color:black;width:100%;border-collapse:collapse;}
+table th, table td{border:1px solid #000;padding:5px;}
 </style>
 </head>
 <body>
@@ -89,58 +54,41 @@ table{
 <!-- ADMIN PANEL -->
 <div class="card" id="adminPanel" style="display:none">
 <h2>👑 Admin Panel</h2>
-
-<h3>Kullanıcılar</h3>
-<table id="userTable" border="1" style="width:100%">
-<tr>
-<th>Kullanıcı</th>
-<th>Şifre</th>
-<th>Bakiye</th>
-</tr>
+<h3>Tüm Kullanıcılar</h3>
+<table id="userTable">
+<tr><th>Kullanıcı</th><th>Şifre</th><th>Bakiye</th></tr>
 </table>
-
 <button onclick="logoutAdmin()">Çık</button>
 </div>
 
 <div class="version">Sürüm: w1.4</div>
 
 <script>
-
-let currentUser = null;
+let currentUser=null;
 
 function register(){
- let id = document.getElementById("regId").value;
- let pass = document.getElementById("regPass").value;
-
- let users = JSON.parse(localStorage.getItem("users")) || [];
-
+ let id=document.getElementById("regId").value;
+ let pass=document.getElementById("regPass").value;
+ let users=JSON.parse(localStorage.getItem("users"))||[];
  users.push({username:id,password:pass,balance:50});
  localStorage.setItem("users",JSON.stringify(users));
-
  alert("Hesap oluşturuldu!");
 }
 
 function login(){
- let id = document.getElementById("loginId").value;
- let pass = document.getElementById("loginPass").value;
-
- let users = JSON.parse(localStorage.getItem("users")) || [];
-
- let user = users.find(u=>u.username==id && u.password==pass);
-
+ let id=document.getElementById("loginId").value;
+ let pass=document.getElementById("loginPass").value;
+ let users=JSON.parse(localStorage.getItem("users"))||[];
+ let user=users.find(u=>u.username==id && u.password==pass);
  if(user){
-  currentUser = user;
+  currentUser=user;
   document.getElementById("loginPanel").style.display="none";
   document.getElementById("userPanel").style.display="block";
   updateBalance();
- }else{
-  alert("Hatalı giriş");
- }
+ }else alert("Hatalı giriş");
 }
 
-function updateBalance(){
- document.getElementById("balance").innerText=currentUser.balance;
-}
+function updateBalance(){document.getElementById("balance").innerText=currentUser.balance;}
 
 function buy(price){
  if(currentUser.balance>=price){
@@ -148,50 +96,30 @@ function buy(price){
    saveUser();
    updateBalance();
    alert("Satın alındı!");
- }else{
-   alert("Yetersiz bakiye");
- }
+ }else alert("Yetersiz bakiye");
 }
 
 function saveUser(){
- let users = JSON.parse(localStorage.getItem("users")) || [];
- users = users.map(u=>{
-   if(u.username==currentUser.username){
-     return currentUser;
-   }
-   return u;
- });
+ let users=JSON.parse(localStorage.getItem("users"))||[];
+ users=users.map(u=>u.username==currentUser.username?currentUser:u);
  localStorage.setItem("users",JSON.stringify(users));
 }
 
-function logout(){
- location.reload();
-}
+function logout(){location.reload();}
 
 function adminLogin(){
- let pass = prompt("Admin şifre:");
-
+ let pass=prompt("Admin şifre:");
  if(pass==="admin123"){
    document.getElementById("loginPanel").style.display="none";
    document.getElementById("adminPanel").style.display="block";
    loadUsers();
- }else{
-   alert("Yanlış şifre");
- }
+ }else alert("Yanlış şifre");
 }
 
 function loadUsers(){
- let users = JSON.parse(localStorage.getItem("users")) || [];
- let table = document.getElementById("userTable");
-
- table.innerHTML=`
- <tr>
- <th>Kullanıcı</th>
- <th>Şifre</th>
- <th>Bakiye</th>
- </tr>
- `;
-
+ let users=JSON.parse(localStorage.getItem("users"))||[];
+ let table=document.getElementById("userTable");
+ table.innerHTML=`<tr><th>Kullanıcı</th><th>Şifre</th><th>Bakiye</th></tr>`;
  users.forEach(u=>{
    let row=table.insertRow();
    row.insertCell(0).innerText=u.username;
@@ -200,10 +128,7 @@ function loadUsers(){
  });
 }
 
-function logoutAdmin(){
- location.reload();
-}
-
+function logoutAdmin(){location.reload();}
 </script>
 </body>
 </html>
