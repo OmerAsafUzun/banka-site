@@ -2,49 +2,177 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Banka</title>
+<title>Banka Sistem</title>
+
 <style>
-body{font-family:Arial;background:#1e3c72;color:white;text-align:center;padding:40px;}
-.panel{background:white;color:black;padding:20px;border-radius:15px;width:300px;margin:auto;}
-button{padding:10px;margin:5px;width:100%;}
+body {
+    font-family: Arial;
+    background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+    color:white;
+    text-align:center;
+}
+
+.container {
+    margin-top:50px;
+}
+
+input {
+    padding:10px;
+    margin:5px;
+    border:none;
+    border-radius:10px;
+}
+
+button {
+    padding:10px 20px;
+    border:none;
+    border-radius:20px;
+    background:#00c6ff;
+    color:white;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+button:hover {
+    transform:scale(1.1);
+    background:#0072ff;
+}
+
+.panel {
+    display:none;
+    margin-top:20px;
+}
 </style>
 </head>
 
 <body>
 
-<h1>Banka</h1>
+<h1>Banka Sistemine Hoşgeldiniz</h1>
 
-<div class="panel" id="login">
-<input id="user" placeholder="Kullanıcı">
-<input id="pass" type="password" placeholder="Şifre">
-<button onclick="login()">Giriş</button>
+<div class="container">
+
+<!-- KAYIT -->
+<div>
+<h3>Kayıt Ol</h3>
+<input id="regUser" placeholder="ID">
+<input id="regPass" placeholder="Şifre">
+<button onclick="register()">Kayıt Ol</button>
 </div>
 
-<div class="panel" id="admin" style="display:none">
-<h2>ADMIN PANEL</h2>
-<p>Tüm kullanıcıları kontrol edebilirsin</p>
+<!-- GİRİŞ -->
+<div>
+<h3>Giriş Yap</h3>
+<input id="loginUser" placeholder="ID">
+<input id="loginPass" placeholder="Şifre">
+<button onclick="login()">Giriş Yap</button>
+</div>
+
+<!-- KULLANICI PANEL -->
+<div id="userPanel" class="panel">
+<h2>Kullanıcı Paneli</h2>
+<p>Bakiye: <span id="balance">0</span> TL</p>
+
+<h3>Para Gönder</h3>
+<input id="sendTo" placeholder="Gönderilecek ID">
+<input id="amount" placeholder="Miktar">
+<button onclick="sendMoney()">Gönder</button>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="adminPanel" class="panel">
+<h2>Admin Panel</h2>
+<button onclick="showUsers()">Kayıtlı Kullanıcıları Göster</button>
+<button onclick="deleteAll()">Tümünü Sil</button>
+<p id="userList"></p>
+</div>
+
 </div>
 
 <script>
 
-// ADMINI ZORLA OLUŞTUR
-localStorage.setItem("users", JSON.stringify({
-admin:{pass:"9999", money:999999}
-}));
+let users = JSON.parse(localStorage.getItem("users")) || {};
+let currentUser = null;
 
-function login(){
-
-let users = JSON.parse(localStorage.getItem("users"));
-let u = user.value;
-let p = pass.value;
-
-if(users[u] && users[u].pass === p){
-login.style.display="none";
-admin.style.display="block";
-}else{
-alert("Hatalı");
+function saveUsers(){
+localStorage.setItem("users", JSON.stringify(users));
 }
 
+function register(){
+let id = regUser.value;
+let pass = regPass.value;
+
+if(!id || !pass){
+alert("Boş bırakma");
+return;
+}
+
+if(users[id]){
+alert("Bu kullanıcı var");
+return;
+}
+
+users[id] = {pass:pass, balance:1000};
+saveUsers();
+alert("Kayıt başarılı");
+}
+
+function login(){
+let id = loginUser.value;
+let pass = loginPass.value;
+
+if(id=="9999" && pass=="admin"){
+adminPanel.style.display="block";
+userPanel.style.display="none";
+alert("Admin giriş");
+return;
+}
+
+if(!users[id] || users[id].pass != pass){
+alert("Hatalı giriş");
+return;
+}
+
+currentUser = id;
+userPanel.style.display="block";
+adminPanel.style.display="none";
+balance.innerText = users[id].balance;
+}
+
+function sendMoney(){
+let to = sendTo.value;
+let amount = Number(amountInput.value);
+
+if(!users[to]){
+alert("Kullanıcı yok");
+return;
+}
+
+if(users[currentUser].balance < amount){
+alert("Yetersiz bakiye");
+return;
+}
+
+users[currentUser].balance -= amount;
+users[to].balance += amount;
+saveUsers();
+
+balance.innerText = users[currentUser].balance;
+alert("Gönderildi");
+}
+
+function showUsers(){
+let text="";
+for(let u in users){
+text += u + " - " + users[u].balance + " TL <br>";
+}
+userList.innerHTML = text;
+}
+
+function deleteAll(){
+users = {};
+saveUsers();
+alert("Tüm kayıtlar silindi");
+location.reload();
 }
 
 </script>
