@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <title>GameMarket</title>
-
 <style>
 body{
 font-family:Arial;
@@ -11,8 +10,8 @@ background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
 color:white;
 text-align:center;
 padding:20px;
+position:relative;
 }
-
 .card{
 background:white;
 color:black;
@@ -22,7 +21,6 @@ border-radius:15px;
 width:360px;
 box-shadow:0 0 20px rgba(0,0,0,0.4);
 }
-
 button{
 padding:10px;
 margin:5px;
@@ -34,28 +32,31 @@ color:white;
 cursor:pointer;
 transition:0.3s;
 }
-
 button:hover{
 transform:scale(1.05);
 background:#0f2027;
 }
-
 input{
 padding:8px;
 margin:5px;
 width:90%;
 }
-
 img{
 width:100%;
 border-radius:10px;
 margin-top:10px;
 }
+.version{
+position:fixed;
+bottom:5px;
+right:10px;
+color:white;
+opacity:0.6;
+font-size:12px;
+}
 </style>
 </head>
-
 <body>
-
 <h1>🎮 GameMarket</h1>
 
 <div class="card" id="loginPanel">
@@ -102,6 +103,8 @@ margin-top:10px;
 <div id="orderList"></div>
 </div>
 
+<div class="version">Sürüm: w1.0</div>
+
 <script>
 let users = JSON.parse(localStorage.getItem("users")) || {};
 let orders = JSON.parse(localStorage.getItem("orders")) || [];
@@ -113,13 +116,8 @@ saveUsers();
 
 let currentUser=null;
 
-function saveUsers(){
-localStorage.setItem("users",JSON.stringify(users));
-}
-
-function saveOrders(){
-localStorage.setItem("orders",JSON.stringify(orders));
-}
+function saveUsers(){ localStorage.setItem("users",JSON.stringify(users)); }
+function saveOrders(){ localStorage.setItem("orders",JSON.stringify(orders)); }
 
 function register(){
 let id=regId.value;
@@ -134,46 +132,35 @@ function login(){
 let id=loginId.value;
 let pass=loginPass.value;
 if(!users[id] || users[id].pass!==pass) return alert("Hatalı giriş");
-
 currentUser=id;
 loginPanel.style.display="none";
-
-if(id==="9999"){
-adminPanel.style.display="block";
-}else{
-userPanel.style.display="block";
-updateBalance();
-}
+if(id==="9999"){ adminPanel.style.display="block"; } 
+else{ userPanel.style.display="block"; updateBalance(); }
 }
 
-function updateBalance(){
-balance.innerText=users[currentUser].balance;
-saveUsers();
-}
+function updateBalance(){ balance.innerText=users[currentUser].balance; saveUsers(); }
 
 function buy(type,price){
 let p = buyPass.value;
 if(users[currentUser].pass!==p) return alert("Şifre yanlış");
 if(users[currentUser].balance<price) return alert("Yetersiz bakiye");
 
-let oyunAdi="omer_a3"; // PetSim için sabit
-
-if(type==="vp" || type==="fortnite"){
-oyunAdi = prompt("Adınızı girin:"); 
-if(!oyunAdi) return;
+let oyunAdi="";
+if(type==="petsim"){ oyunAdi="omer_a3"; }
+if(type==="vp"){ 
+oyunAdi = prompt("Valorant kullanıcı adınızı gir:"); 
+if(!oyunAdi) return; 
+}
+if(type==="fortnite"){ 
+oyunAdi = prompt("Fortnite kullanıcı adınızı gir:"); 
+if(!oyunAdi) return; 
 }
 
-orders.push({
-user: currentUser,
-urun: type,
-oyunAdi: oyunAdi
-});
-
+orders.push({user:currentUser,urun:type,oyunAdi:oyunAdi});
 saveOrders();
 
 users[currentUser].balance-=price;
 updateBalance();
-
 alert("Sipariş alındı");
 }
 
@@ -181,7 +168,6 @@ function giveMoney(){
 let to=giveTo.value;
 let a=Number(giveAmount.value);
 if(!users[to]) return;
-
 users[to].balance+=a;
 saveUsers();
 alert("Para verildi");
@@ -190,16 +176,12 @@ alert("Para verildi");
 function showOrders(){
 let text="";
 orders.forEach(o=>{
-text += "Kullanıcı: "+o.user+
-" | Ürün: "+o.urun+
-" | Adı: "+o.oyunAdi+"<br>";
+text += "Kullanıcı: "+o.user+" | Ürün: "+o.urun+" | Kullanıcı Adı: "+o.oyunAdi+"<br>";
 });
 orderList.innerHTML=text;
 }
 
-function logout(){
-location.reload();
-}
+function logout(){ location.reload(); }
 </script>
 
 </body>
