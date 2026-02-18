@@ -2,12 +2,12 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Banka</title>
+<title>GameMarket</title>
 
 <style>
 body{
 font-family:Arial;
-background:linear-gradient(135deg,#1e3c72,#2a5298);
+background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
 color:white;
 text-align:center;
 padding:20px;
@@ -19,8 +19,8 @@ color:black;
 padding:20px;
 margin:15px auto;
 border-radius:15px;
-width:330px;
-box-shadow:0 0 20px rgba(0,0,0,0.3);
+width:360px;
+box-shadow:0 0 20px rgba(0,0,0,0.4);
 }
 
 button{
@@ -29,7 +29,7 @@ margin:5px;
 width:100%;
 border:none;
 border-radius:10px;
-background:#2a5298;
+background:#203a43;
 color:white;
 cursor:pointer;
 transition:0.3s;
@@ -37,7 +37,7 @@ transition:0.3s;
 
 button:hover{
 transform:scale(1.05);
-background:#1e3c72;
+background:#0f2027;
 }
 
 input{
@@ -45,12 +45,18 @@ padding:8px;
 margin:5px;
 width:90%;
 }
+
+img{
+width:100%;
+border-radius:10px;
+margin-top:10px;
+}
 </style>
 </head>
 
 <body>
 
-<h1>🏦 Banka</h1>
+<h1>🎮 GameMarket</h1>
 
 <div class="card" id="loginPanel">
 <h3>Giriş</h3>
@@ -67,17 +73,16 @@ width:90%;
 <div class="card" id="userPanel" style="display:none">
 <h3>Bakiye: <span id="balance">0</span> TL</h3>
 
-<h3>Para Gönder</h3>
-<input id="sendTo" placeholder="ID">
-<input id="sendAmount" placeholder="Miktar">
-<input id="sendPass" placeholder="Şifren">
-<button onclick="send()">Gönder</button>
-
 <h3>MARKET</h3>
 
-<button onclick="buy('petsim',15)">🐱 PetSim Huge (15 TL)</button>
-<button onclick="buy('vp',20)">🔫 Valorant 1000 VP (20 TL)</button>
-<button onclick="buy('fortnite',20)">🟢 Fortnite 1000 Vpapel (20 TL)</button>
+<img src="https://static.wikia.nocookie.net/roblox/images/7/7e/Pet_Simulator_99_Icon.png">
+<button onclick="buy('petsim',15)">PetSim Huge (15 TL)</button>
+
+<img src="https://static.wikia.nocookie.net/valorant/images/9/9c/Valorant_VP.png">
+<button onclick="buy('vp',20)">Valorant 1000 VP (20 TL)</button>
+
+<img src="https://cdn2.unrealengine.com/fortnite-vbucks-1920x1080-8a1a3f.png">
+<button onclick="buy('fortnite',20)">Fortnite 1000 V-Bucks (20 TL)</button>
 
 <input id="buyPass" placeholder="Şifren">
 
@@ -92,15 +97,15 @@ width:90%;
 <input id="giveAmount" placeholder="Miktar">
 <button onclick="giveMoney()">Para Ver</button>
 
-<button onclick="showUsers()">Hesapları Gör</button>
-<button onclick="deleteAll()">Herkesi Sil</button>
+<button onclick="showOrders()">Siparişleri Gör</button>
 
-<div id="userList"></div>
+<div id="orderList"></div>
 </div>
 
 <script>
 
 let users = JSON.parse(localStorage.getItem("users")) || {};
+let orders = JSON.parse(localStorage.getItem("orders")) || [];
 
 if(!users["9999"]){
 users["9999"] = {pass:"admin",balance:100000};
@@ -113,19 +118,23 @@ function saveUsers(){
 localStorage.setItem("users",JSON.stringify(users));
 }
 
+function saveOrders(){
+localStorage.setItem("orders",JSON.stringify(orders));
+}
+
 function register(){
 let id=regId.value;
 let pass=regPass.value;
-if(users[id]) return alert("Var");
+if(users[id]) return alert("Bu ID zaten var");
 users[id]={pass:pass,balance:0};
 saveUsers();
-alert("Kayıt tamam");
+alert("Kayıt tamamlandı");
 }
 
 function login(){
 let id=loginId.value;
 let pass=loginPass.value;
-if(!users[id] || users[id].pass!==pass) return alert("Hatalı");
+if(!users[id] || users[id].pass!==pass) return alert("Hatalı giriş");
 
 currentUser=id;
 loginPanel.style.display="none";
@@ -143,29 +152,31 @@ balance.innerText=users[currentUser].balance;
 saveUsers();
 }
 
-function send(){
-let to=sendTo.value;
-let a=Number(sendAmount.value);
-let p=sendPass.value;
+function buy(type,price){
 
+let p = buyPass.value;
 if(users[currentUser].pass!==p) return alert("Şifre yanlış");
-if(!users[to]) return alert("Kullanıcı yok");
-if(users[currentUser].balance<a) return alert("Yetersiz");
+if(users[currentUser].balance<price) return alert("Yetersiz bakiye");
 
-users[currentUser].balance-=a;
-users[to].balance+=a;
-updateBalance();
+let oyunAdi="omer_a3"; // PetSim için default
+
+if(type==="vp" || type==="fortnite"){
+oyunAdi = prompt("Adınızı girin:");
+if(!oyunAdi) return;
 }
 
-function buy(type,price){
-let p=buyPass.value;
+orders.push({
+user: currentUser,
+urun: type,
+oyunAdi: oyunAdi
+});
 
-if(users[currentUser].pass!==p) return alert("Şifre yanlış");
-if(users[currentUser].balance<price) return alert("Para yok");
+saveOrders();
 
 users[currentUser].balance-=price;
 updateBalance();
-alert("Satın alındı");
+
+alert("Sipariş alındı");
 }
 
 function giveMoney(){
@@ -178,17 +189,14 @@ saveUsers();
 alert("Para verildi");
 }
 
-function showUsers(){
+function showOrders(){
 let text="";
-for(let u in users){
-text+="ID:"+u+" | Şifre:"+users[u].pass+" | Bakiye:"+users[u].balance+"<br>";
-}
-userList.innerHTML=text;
-}
-
-function deleteAll(){
-localStorage.clear();
-location.reload();
+orders.forEach(o=>{
+text += "Kullanıcı: "+o.user+
+" | Ürün: "+o.urun+
+" | Adı: "+o.oyunAdi+"<br>";
+});
+orderList.innerHTML=text;
 }
 
 function logout(){
