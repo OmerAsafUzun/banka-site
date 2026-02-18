@@ -2,133 +2,172 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>GameMarket w1.4</title>
+<title>GameMarket</title>
 <style>
-body{font-family:Arial;background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);color:white;text-align:center;padding:20px;}
-.card{background:white;color:black;padding:20px;margin:15px auto;border-radius:15px;width:360px;box-shadow:0 0 20px rgba(0,0,0,0.4);}
-button{padding:10px;margin:5px;width:100%;border:none;border-radius:10px;background:#203a43;color:white;cursor:pointer;}
-img{width:100%;border-radius:10px;margin-top:10px;}
-.version{position:fixed;bottom:5px;right:10px;font-size:12px;opacity:0.6;}
-table{color:black;width:100%;border-collapse:collapse;}
-table th, table td{border:1px solid #000;padding:5px;}
+body{
+  font-family:Arial;
+  background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+  color:white;
+  text-align:center;
+  padding:20px;
+  position:relative;
+}
+.card{
+  background:white;
+  color:black;
+  padding:20px;
+  margin:15px auto;
+  border-radius:15px;
+  width:360px;
+  box-shadow:0 0 20px rgba(0,0,0,0.4);
+}
+button{
+  padding:10px;
+  margin:5px;
+  width:100%;
+  border:none;
+  border-radius:10px;
+  background:#203a43;
+  color:white;
+  cursor:pointer;
+  transition:0.3s;
+}
+button:hover{
+  transform:scale(1.05);
+  background:#0f2027;
+}
+input{
+  padding:8px;
+  margin:5px;
+  width:90%;
+}
+img{
+  width:100%;
+  border-radius:10px;
+  margin-top:10px;
+}
+.version{
+  position:fixed;
+  bottom:5px;
+  right:10px;
+  color:white;
+  opacity:0.6;
+  font-size:12px;
+}
 </style>
 </head>
 <body>
 
 <h1>🎮 GameMarket</h1>
 
-<!-- LOGIN -->
+<!-- LOGIN / REGISTER -->
 <div class="card" id="loginPanel">
 <h3>Giriş</h3>
-<input id="loginId" placeholder="ID"><br>
-<input id="loginPass" placeholder="Şifre"><br>
+<input id="loginId" placeholder="ID">
+<input id="loginPass" placeholder="Şifre">
 <button onclick="login()">Giriş</button>
 
 <h3>Kayıt</h3>
-<input id="regId" placeholder="Yeni ID"><br>
-<input id="regPass" placeholder="Şifre"><br>
+<input id="regId" placeholder="Yeni ID">
+<input id="regPass" placeholder="Şifre">
 <button onclick="register()">Hesap Oluştur</button>
-
-<br><br>
-<button onclick="adminLogin()">👑 Admin Girişi</button>
 </div>
 
 <!-- USER PANEL -->
 <div class="card" id="userPanel" style="display:none">
+<h3 id="welcome"></h3>
 <h3>Bakiye: <span id="balance">0</span> Para</h3>
 
 <h3>MARKET</h3>
 
-<img src="https://static.wikia.nocookie.net/pet-simulator/images/6/6c/Huge_Cat.png">
-<button onclick="buy(15)">PetSim Huge (15 Para)</button>
+<!-- Örnek Ürünler -->
+<img src="https://cdn.hesap.com.tr/cache/uploads/ilan_images/random-huge-pet-simulator-99-fsnt.webp">
+<button onclick="buy('petsim',15)">PetSim Huge (15 Para)</button>
 
-<img src="https://static.wikia.nocookie.net/valorant/images/6/6d/Valorant_Points.png">
-<button onclick="buy(20)">Valorant 1000 VP (20 Para)</button>
+<img src="https://via.placeholder.com/300x150?text=Valorant+VP">
+<button onclick="buy('valorant',25)">Valorant VP (25 Para)</button>
 
-<img src="https://static.wikia.nocookie.net/fortnite/images/7/7e/V-Bucks.png">
-<button onclick="buy(25)">Fortnite 1000 V-Bucks (25 Para)</button>
+<!-- Admin Panel -->
+<div id="adminPanel" style="display:none; margin-top:20px; text-align:left;">
+<h3>Admin Paneli - Tüm Kullanıcılar</h3>
+<ul id="allUsers"></ul>
+</div>
 
 <button onclick="logout()">Çıkış</button>
 </div>
 
-<!-- ADMIN PANEL -->
-<div class="card" id="adminPanel" style="display:none">
-<h2>👑 Admin Panel</h2>
-<h3>Tüm Kullanıcılar</h3>
-<table id="userTable">
-<tr><th>Kullanıcı</th><th>Şifre</th><th>Bakiye</th></tr>
-</table>
-<button onclick="logoutAdmin()">Çık</button>
-</div>
-
-<div class="version">Sürüm: w1.5</div>
+<div class="version">v1.0</div>
 
 <script>
-let currentUser=null;
+// Kullanıcı verilerini saklamak için basit obje
+let users = JSON.parse(localStorage.getItem("users") || "{}");
+let currentUser = null;
 
-function register(){
- let id=document.getElementById("regId").value;
- let pass=document.getElementById("regPass").value;
- let users=JSON.parse(localStorage.getItem("users"))||[];
- users.push({username:id,password:pass,balance:50});
- localStorage.setItem("users",JSON.stringify(users));
- alert("Hesap oluşturuldu!");
+// Giriş fonksiyonu
+function login() {
+  const id = document.getElementById("loginId").value;
+  const pass = document.getElementById("loginPass").value;
+
+  if(users[id] && users[id].pass === pass){
+    currentUser = {id:id, ...users[id]};
+    showUserPanel();
+  } else {
+    alert("ID veya Şifre yanlış!");
+  }
 }
 
-function login(){
- let id=document.getElementById("loginId").value;
- let pass=document.getElementById("loginPass").value;
- let users=JSON.parse(localStorage.getItem("users"))||[];
- let user=users.find(u=>u.username==id && u.password==pass);
- if(user){
-  currentUser=user;
+// Kayıt fonksiyonu
+function register() {
+  const id = document.getElementById("regId").value;
+  const pass = document.getElementById("regPass").value;
+  if(!id || !pass){ alert("ID ve Şifre girin!"); return; }
+  if(users[id]){ alert("Bu ID zaten kayıtlı!"); return; }
+  users[id] = {pass:pass, balance:50};
+  localStorage.setItem("users", JSON.stringify(users));
+  alert("Hesap oluşturuldu!");
+}
+
+// Kullanıcı panelini göster
+function showUserPanel(){
   document.getElementById("loginPanel").style.display="none";
   document.getElementById("userPanel").style.display="block";
-  updateBalance();
- }else alert("Hatalı giriş");
+  document.getElementById("welcome").innerText = `Hoşgeldin, ${currentUser.id}`;
+  document.getElementById("balance").innerText = currentUser.balance;
+
+  // Admin ise paneli göster
+  if(currentUser.id === "w1.6"){
+    document.getElementById("adminPanel").style.display="block";
+    updateAdminPanel();
+  }
 }
 
-function updateBalance(){document.getElementById("balance").innerText=currentUser.balance;}
-
-function buy(price){
- if(currentUser.balance>=price){
-   currentUser.balance-=price;
-   saveUser();
-   updateBalance();
-   alert("Satın alındı!");
- }else alert("Yetersiz bakiye");
+// Admin panelini güncelle
+function updateAdminPanel(){
+  const list = document.getElementById("allUsers");
+  list.innerHTML="";
+  for(let uid in users){
+    list.innerHTML += `<li>${uid} - Bakiye: ${users[uid].balance}</li>`;
+  }
 }
 
-function saveUser(){
- let users=JSON.parse(localStorage.getItem("users"))||[];
- users=users.map(u=>u.username==currentUser.username?currentUser:u);
- localStorage.setItem("users",JSON.stringify(users));
+// Market alışveriş
+function buy(item, cost){
+  if(currentUser.balance >= cost){
+    currentUser.balance -= cost;
+    users[currentUser.id].balance = currentUser.balance;
+    localStorage.setItem("users", JSON.stringify(users));
+    document.getElementById("balance").innerText = currentUser.balance;
+    alert(item + " satın alındı!");
+  } else alert("Yeterli bakiye yok!");
 }
 
-function logout(){location.reload();}
-
-function adminLogin(){
- let pass=prompt("Admin şifre:");
- if(pass==="admin123"){
-   document.getElementById("loginPanel").style.display="none";
-   document.getElementById("adminPanel").style.display="block";
-   loadUsers();
- }else alert("Yanlış şifre");
+// Çıkış
+function logout(){
+  currentUser=null;
+  document.getElementById("userPanel").style.display="none";
+  document.getElementById("loginPanel").style.display="block";
 }
-
-function loadUsers(){
- let users=JSON.parse(localStorage.getItem("users"))||[];
- let table=document.getElementById("userTable");
- table.innerHTML=`<tr><th>Kullanıcı</th><th>Şifre</th><th>Bakiye</th></tr>`;
- users.forEach(u=>{
-   let row=table.insertRow();
-   row.insertCell(0).innerText=u.username;
-   row.insertCell(1).innerText=u.password;
-   row.insertCell(2).innerText=u.balance;
- });
-}
-
-function logoutAdmin(){location.reload();}
 </script>
+
 </body>
 </html>
