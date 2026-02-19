@@ -1,118 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>GameMarket</title>
+<style>
+body{
+  font-family:Arial;
+  background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+  color:white;
+  text-align:center;
+  padding:20px;
+  position:relative;
+}
+.card{
+  background:white;
+  color:black;
+  padding:20px;
+  margin:15px auto;
+  border-radius:15px;
+  width:360px;
+  box-shadow:0 0 20px rgba(0,0,0,0.4);
+}
+button{
+  padding:10px;
+  margin:5px;
+  width:100%;
+  border:none;
+  border-radius:10px;
+  background:#203a43;
+  color:white;
+  cursor:pointer;
+  transition:0.3s;
+}
+button:hover{
+  transform:scale(1.05);
+  background:#0f2027;
+}
+input{
+  padding:8px;
+  margin:5px;
+  width:90%;
+}
+img{
+  width:100%;
+  border-radius:10px;
+  margin-top:10px;
+}
+.version{
+  position:fixed;
+  bottom:5px;
+  right:10px;
+  color:white;
+  opacity:0.6;
+  font-size:12px;
+}
+</style>
+</head>
+<body>
+
+<h1>🎮 GameMarket</h1>
+
+<!-- LOGIN / REGISTER -->
+<div class="card" id="loginPanel">
+<h3>Giriş</h3>
+<input id="loginId" placeholder="ID">
+<input id="loginPass" placeholder="Şifre">
+<button onclick="login()">Giriş</button>
+
+<h3>Kayıt</h3>
+<input id="regId" placeholder="Yeni ID">
+<input id="regPass" placeholder="Şifre">
+<button onclick="register()">Hesap Oluştur</button>
+</div>
+
+<!-- USER PANEL -->
+<div class="card" id="userPanel" style="display:none">
+<h3>Bakiye: <span id="balance">0</span> Para</h3>
+
+<button onclick="toggleMarket()">MARKET</button>
+
+<div id="marketPanel" style="display:none">
+
+<!-- PetSim Huge -->
+<img src="YOUR_IMAGE_URL_1">
+<button onclick="buy('PetSim Huge', 15)">PetSim Huge (15 Para)</button>
+
+<!-- Valorant VP -->
+<img src="YOUR_IMAGE_URL_2">
+<button onclick="buy('Valorant VP', 10)">Valorant VP (10 Para)</button>
+
+<!-- Fortnite 1000 VP -->
+<img src="YOUR_IMAGE_URL_3">
+<button onclick="buy('Fortnite 1000 VP', 20)">Fortnite 1000 VP (20 Para)</button>
+
+</div>
+
+<h3>Kullanıcılara Para Gönder</h3>
+<input id="sendUser" placeholder="Kullanıcı ID">
+<input id="sendAmount" placeholder="Miktar">
+<button onclick="sendMoney()">Gönder</button>
+</div>
+
+<div class="version">w.2.2</div>
+
 <script>
+let users = {};
+let currentUser = null;
 
-// VERİYİ LOCAL STORAGE'DAN ÇEK
-let users = JSON.parse(localStorage.getItem("users")) || {};
-let currentUser = localStorage.getItem("currentUser") || null;
-
-// VERİYİ KAYDET
-function saveData(){
-  localStorage.setItem("users", JSON.stringify(users));
-  localStorage.setItem("currentUser", currentUser);
-}
-
-// Register
+// Kayıt
 function register(){
-  const id = document.getElementById('regId').value;
-  const pass = document.getElementById('regPass').value;
-
-  if(!id || !pass){
-    alert("Boş bırakma!");
-    return;
-  }
-
-  if(users[id]){
-    alert("Bu ID zaten var!");
-  } else {
-    users[id] = {pass:pass, balance:0};
-    saveData();
-    alert("Hesap oluşturuldu!");
-  }
+  const id = document.getElementById("regId").value;
+  const pass = document.getElementById("regPass").value;
+  if(!id || !pass){ alert("Boş bırakamazsın"); return; }
+  if(users[id]){ alert("Kullanıcı zaten var"); return; }
+  users[id] = {pass: pass, balance: 0};
+  alert("Kayıt başarılı!"); 
 }
 
-// Login
+// Giriş
 function login(){
-  const id = document.getElementById('loginId').value;
-  const pass = document.getElementById('loginPass').value;
-
-  if(id === "admin" && pass === "admin"){
-    currentUser = "admin";
-    saveData();
-    document.getElementById('loginPanel').style.display='none';
-    document.getElementById('adminPanel').style.display='block';
-    showAllUsers();
-    return;
-  }
-
+  const id = document.getElementById("loginId").value;
+  const pass = document.getElementById("loginPass").value;
   if(users[id] && users[id].pass === pass){
     currentUser = id;
-    saveData();
-    document.getElementById('loginPanel').style.display='none';
-    document.getElementById('userPanel').style.display='block';
+    document.getElementById("loginPanel").style.display = "none";
+    document.getElementById("userPanel").style.display = "block";
     updateBalance();
   } else {
-    alert("Yanlış giriş!");
+    alert("Hatalı giriş!");
   }
 }
 
-// BAKİYE GÜNCELLE
+// Bakiye güncelle
 function updateBalance(){
-  document.getElementById('balance').innerText = users[currentUser].balance;
+  document.getElementById("balance").innerText = users[currentUser].balance;
 }
 
-// SATIN AL
+// Market paneli göster/gizle
+function toggleMarket(){
+  const mp = document.getElementById("marketPanel");
+  mp.style.display = mp.style.display === "none" ? "block" : "none";
+}
+
+// Ürün satın alma
 function buy(item, price){
   if(users[currentUser].balance >= price){
     users[currentUser].balance -= price;
-    saveData();
     updateBalance();
-    alert(item + " satın alındı!");
+    alert(item + " alındı!");
   } else {
-    alert("Yeterli bakiye yok!");
+    alert("Yetersiz bakiye");
   }
 }
 
-// ADMIN TÜM KULLANICILARI GÖR
-function showAllUsers(){
-  const div = document.getElementById('allUsers');
-  div.innerHTML = "";
-
-  for(const u in users){
-    div.innerHTML += `
-      <p>
-      ${u} - Bakiye: ${users[u].balance}
-      <button onclick="addMoney('${u}')">+20 Para</button>
-      </p>
-    `;
-  }
+// Kullanıcıya para gönder
+function sendMoney(){
+  const target = document.getElementById("sendUser").value;
+  const amount = parseInt(document.getElementById("sendAmount").value);
+  if(!users[target]){ alert("Kullanıcı yok"); return; }
+  if(users[currentUser].balance < amount){ alert("Yetersiz bakiye"); return; }
+  users[currentUser].balance -= amount;
+  users[target].balance += amount;
+  updateBalance();
+  alert(amount + " para gönderildi!");
 }
-
-// ADMIN PARA EKLE
-function addMoney(user){
-  users[user].balance += 20;
-  saveData();
-  showAllUsers();
-}
-
-// SAYFA YENİLENİNCE OTOMATİK GİRİŞ
-window.onload = function(){
-  if(currentUser){
-    document.getElementById('loginPanel').style.display='none';
-
-    if(currentUser === "admin"){
-      document.getElementById('adminPanel').style.display='block';
-      showAllUsers();
-    } else {
-      document.getElementById('userPanel').style.display='block';
-      updateBalance();
- <!-- VERSION -->
-<div class="version">
-  W2.3
-</div>
+</script>
 
 </body>
 </html>
-    }
-  }
-}
-
-</script>
