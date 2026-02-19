@@ -54,6 +54,9 @@ img{
   opacity:0.6;
   font-size:12px;
 }
+.hidden{
+  display:none;
+}
 </style>
 </head>
 <body>
@@ -74,121 +77,156 @@ img{
 </div>
 
 <!-- USER PANEL -->
-<div class="card" id="userPanel" style="display:none">
-<h3>Hoşgeldin <span id="userName"></span></h3>
+<div class="card hidden" id="userPanel">
+<h3>Hoşgeldiniz <span id="usernameDisplay"></span></h3>
 <h3>Bakiye: <span id="balance">0</span> Para</h3>
 
 <button onclick="showMarket()">Market</button>
-<button onclick="sendMoneyPrompt()">Para Gönder</button>
+<button onclick="showSend()">Para Gönder</button>
 
-<div id="marketPanel" style="display:none; margin-top:10px"></div>
+<div id="sendPanel" class="hidden">
+<h4>Para Gönder</h4>
+<input id="sendId" placeholder="Alıcı ID">
+<input id="sendAmount" placeholder="Miktar" type="number">
+<button onclick="sendMoney()">Gönder</button>
 </div>
 
-<!-- ADMIN PANEL -->
-<div class="card" id="adminPanel" style="display:none">
-<h3>Admin Panel</h3>
-<h4>Tüm Kullanıcılar:</h4>
-<div id="userList"></div>
+<div id="marketPanel" class="hidden">
+<h3>MARKET</h3>
+<!-- Ürünleri buraya sen koyabilirsin, örnek: -->
+<img src="foto1.jpg" alt="Ürün 1">
+<button onclick="buy('urun1', 15)">Ürün 1 (15 Para)</button>
 
-<h4>Para Ekle:</h4>
-<input id="adminUserId" placeholder="Kullanıcı ID">
-<input id="adminAmount" placeholder="Miktar">
-<button onclick="adminAddMoneyPrompt()">Ekle</button>
+<img src="foto2.jpg" alt="Ürün 2">
+<button onclick="buy('urun2', 10)">Ürün 2 (10 Para)</button>
 </div>
 
-<div class="version">v2.3</div>
+<div id="adminPanel" class="hidden">
+<h3>Admin Paneli</h3>
+<h4>Kullanıcılar</h4>
+<ul id="userList"></ul>
+
+<h4>Para Ekle</h4>
+<input id="addId" placeholder="Kullanıcı ID">
+<input id="addAmount" placeholder="Miktar" type="number">
+<button onclick="addMoney()">Ekle</button>
+</div>
+</div>
+
+<div class="version">w.2.2</div>
 
 <script>
-let users = {};
-let currentUser = null;
-
-function register() {
-  const id = document.getElementById('regId').value;
-  const pass = document.getElementById('regPass').value;
-  if(users[id]) { alert("ID zaten var!"); return; }
-  users[id] = {pass: pass, balance: 0};
-  alert("Hesap oluşturuldu! Başlangıç parası: 0");
-}
-
-function login() {
-  const id = document.getElementById('loginId').value;
-  const pass = document.getElementById('loginPass').value;
-
-  // Admin kontrol
-  if(id === "9999" && pass === "admin") {
-    document.getElementById('loginPanel').style.display = 'none';
-    document.getElementById('adminPanel').style.display = 'block';
-    updateUserList();
-    return;
-  }
-
-  if(!users[id] || users[id].pass !== pass) { alert("Hatalı giriş"); return; }
-
-  currentUser = id;
-  document.getElementById('loginPanel').style.display = 'none';
-  document.getElementById('userPanel').style.display = 'block';
-  document.getElementById('userName').innerText = currentUser;
-  updateBalance();
-}
-
-function updateBalance() {
-  if(currentUser) document.getElementById('balance').innerText = users[currentUser].balance;
-}
-
-// Market
-const products = [
-  {name:"PetSim Huge", price:15},
-  {name:"Valorant VP", price:10},
-  {name:"Fortnite 1000 VP", price:20}
+// kullanıcı verileri
+let users = [
+  {id: '9999', pass: 'admin', balance: 0, isAdmin:true} // admin
 ];
 
-function showMarket() {
-  const panel = document.getElementById('marketPanel');
-  panel.innerHTML = "";
-  panel.style.display = 'block';
-  products.forEach(p => {
-    const btn = document.createElement('button');
-    btn.innerText = `${p.name} (${p.price} Para)`;
-    btn.onclick = () => buy(p.name, p.price);
-    panel.appendChild(btn);
+let currentUser = null;
+
+// kayıt
+function register(){
+  const id = document.getElementById('regId').value;
+  const pass = document.getElementById('regPass').value;
+  if(users.find(u=>u.id===id)){
+    alert("Bu ID zaten var!");
+    return;
+  }
+  users.push({id:id, pass:pass, balance:0, isAdmin:false});
+  alert("Kayıt başarılı!");
+}
+
+// giriş
+function login(){
+  const id = document.getElementById('loginId').value;
+  const pass = document.getElementById('loginPass').value;
+  const user = users.find(u=>u.id===id && u.pass===pass);
+  if(!user){
+    alert("ID veya şifre yanlış!");
+    return;
+  }
+  currentUser = user;
+  document.getElementById('loginPanel').classList.add('hidden');
+  document.getElementById('userPanel').classList.remove('hidden');
+  document.getElementById('usernameDisplay').innerText = currentUser.id;
+  updateBalance();
+  if(currentUser.isAdmin){
+    document.getElementById('adminPanel').classList.remove('hidden');
+    showUsers();
+  }
+}
+
+// bakiye güncelle
+function updateBalance(){
+  document.getElementById('balance').innerText = currentUser.balance;
+}
+
+// market göster
+function showMarket(){
+  document.getElementById('marketPanel').classList.toggle('hidden');
+  document.getElementById('sendPanel').classList.add('hidden');
+}
+
+// para gönder paneli
+function showSend(){
+  document.getElementById('sendPanel').classList.toggle('hidden');
+  document.getElementById('marketPanel').classList.add('hidden');
+}
+
+// ürün alma
+function buy(product, price){
+  if(currentUser.balance<price){
+    alert("Yeterli bakiyen yok!");
+    return;
+  }
+  currentUser.balance -= price;
+  updateBalance();
+  alert(product + " satın alındı!");
+}
+
+// para gönder
+function sendMoney(){
+  const id = document.getElementById('sendId').value;
+  const amount = parseInt(document.getElementById('sendAmount').value);
+  const receiver = users.find(u=>u.id===id);
+  if(!receiver){
+    alert("Kullanıcı bulunamadı!");
+    return;
+  }
+  if(currentUser.balance<amount || amount<=0){
+    alert("Geçersiz miktar!");
+    return;
+  }
+  currentUser.balance -= amount;
+  receiver.balance += amount;
+  updateBalance();
+  alert("Para gönderildi!");
+}
+
+// admin kullanıcı listesi
+function showUsers(){
+  const ul = document.getElementById('userList');
+  ul.innerHTML='';
+  users.forEach(u=>{
+    if(!u.isAdmin){
+      const li = document.createElement('li');
+      li.innerText = `${u.id} - Bakiye: ${u.balance}`;
+      ul.appendChild(li);
+    }
   });
 }
 
-function buy(item, price) {
-  if(users[currentUser].balance < price) { alert("Yetersiz bakiye"); return; }
-  users[currentUser].balance -= price;
-  updateBalance();
-  alert(item + " alındı!");
-}
-
-// Kullanıcılar arası para gönderme
-function sendMoneyPrompt() {
-  const to = prompt("Kime göndereceksin?");
-  const amount = parseInt(prompt("Ne kadar?"));
-  if(!users[to]) { alert("Kullanıcı yok!"); return; }
-  if(users[currentUser].balance < amount) { alert("Yetersiz bakiye"); return; }
-  users[currentUser].balance -= amount;
-  users[to].balance += amount;
-  updateBalance();
-  alert(amount + " Para gönderildi!");
-}
-
-// Admin fonksiyonları
-function updateUserList() {
-  const div = document.getElementById('userList');
-  div.innerHTML = "";
-  for(const id in users) {
-    div.innerHTML += id + ": " + users[id].balance + " Para<br>";
+// admin para ekle
+function addMoney(){
+  const id = document.getElementById('addId').value;
+  const amount = parseInt(document.getElementById('addAmount').value);
+  const user = users.find(u=>u.id===id);
+  if(!user){
+    alert("Kullanıcı bulunamadı!");
+    return;
   }
-}
-
-function adminAddMoneyPrompt() {
-  const id = document.getElementById('adminUserId').value;
-  const amount = parseInt(document.getElementById('adminAmount').value);
-  if(!users[id]) { alert("Kullanıcı yok!"); return; }
-  users[id].balance += amount;
-  updateUserList();
-  alert(id + " kullanıcısına " + amount + " Para eklendi!");
+  user.balance += amount;
+  alert("Para eklendi!");
+  showUsers();
 }
 </script>
 </body>
