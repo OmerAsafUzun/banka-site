@@ -75,96 +75,121 @@ img{
 
 <!-- USER PANEL -->
 <div class="card" id="userPanel" style="display:none">
+<h3>Hoşgeldin <span id="userName"></span></h3>
 <h3>Bakiye: <span id="balance">0</span> Para</h3>
 
-<button onclick="toggleMarket()">MARKET</button>
+<button onclick="showMarket()">Market</button>
+<button onclick="sendMoneyPrompt()">Para Gönder</button>
 
-<div id="marketPanel" style="display:none">
-
-<!-- PetSim Huge -->
-<img src="YOUR_IMAGE_URL_1">
-<button onclick="buy('PetSim Huge', 15)">PetSim Huge (15 Para)</button>
-
-<!-- Valorant VP -->
-<img src="YOUR_IMAGE_URL_2">
-<button onclick="buy('Valorant VP', 10)">Valorant VP (10 Para)</button>
-
-<!-- Fortnite 1000 VP -->
-<img src="YOUR_IMAGE_URL_3">
-<button onclick="buy('Fortnite 1000 VP', 20)">Fortnite 1000 VP (20 Para)</button>
-
+<div id="marketPanel" style="display:none; margin-top:10px"></div>
 </div>
 
-<h3>Kullanıcılara Para Gönder</h3>
-<input id="sendUser" placeholder="Kullanıcı ID">
-<input id="sendAmount" placeholder="Miktar">
-<button onclick="sendMoney()">Gönder</button>
+<!-- ADMIN PANEL -->
+<div class="card" id="adminPanel" style="display:none">
+<h3>Admin Panel</h3>
+<h4>Tüm Kullanıcılar:</h4>
+<div id="userList"></div>
+
+<h4>Para Ekle:</h4>
+<input id="adminUserId" placeholder="Kullanıcı ID">
+<input id="adminAmount" placeholder="Miktar">
+<button onclick="adminAddMoneyPrompt()">Ekle</button>
 </div>
 
-<div class="version">w.2.2</div>
+<div class="version">v2.3</div>
 
 <script>
 let users = {};
 let currentUser = null;
 
-// Kayıt
-function register(){
-  const id = document.getElementById("regId").value;
-  const pass = document.getElementById("regPass").value;
-  if(!id || !pass){ alert("Boş bırakamazsın"); return; }
-  if(users[id]){ alert("Kullanıcı zaten var"); return; }
+function register() {
+  const id = document.getElementById('regId').value;
+  const pass = document.getElementById('regPass').value;
+  if(users[id]) { alert("ID zaten var!"); return; }
   users[id] = {pass: pass, balance: 0};
-  alert("Kayıt başarılı!"); 
+  alert("Hesap oluşturuldu! Başlangıç parası: 0");
 }
 
-// Giriş
-function login(){
-  const id = document.getElementById("loginId").value;
-  const pass = document.getElementById("loginPass").value;
-  if(users[id] && users[id].pass === pass){
-    currentUser = id;
-    document.getElementById("loginPanel").style.display = "none";
-    document.getElementById("userPanel").style.display = "block";
-    updateBalance();
-  } else {
-    alert("Hatalı giriş!");
+function login() {
+  const id = document.getElementById('loginId').value;
+  const pass = document.getElementById('loginPass').value;
+
+  // Admin kontrol
+  if(id === "9999" && pass === "admin") {
+    document.getElementById('loginPanel').style.display = 'none';
+    document.getElementById('adminPanel').style.display = 'block';
+    updateUserList();
+    return;
   }
-}
 
-// Bakiye güncelle
-function updateBalance(){
-  document.getElementById("balance").innerText = users[currentUser].balance;
-}
+  if(!users[id] || users[id].pass !== pass) { alert("Hatalı giriş"); return; }
 
-// Market paneli göster/gizle
-function toggleMarket(){
-  const mp = document.getElementById("marketPanel");
-  mp.style.display = mp.style.display === "none" ? "block" : "none";
-}
-
-// Ürün satın alma
-function buy(item, price){
-  if(users[currentUser].balance >= price){
-    users[currentUser].balance -= price;
-    updateBalance();
-    alert(item + " alındı!");
-  } else {
-    alert("Yetersiz bakiye");
-  }
-}
-
-// Kullanıcıya para gönder
-function sendMoney(){
-  const target = document.getElementById("sendUser").value;
-  const amount = parseInt(document.getElementById("sendAmount").value);
-  if(!users[target]){ alert("Kullanıcı yok"); return; }
-  if(users[currentUser].balance < amount){ alert("Yetersiz bakiye"); return; }
-  users[currentUser].balance -= amount;
-  users[target].balance += amount;
+  currentUser = id;
+  document.getElementById('loginPanel').style.display = 'none';
+  document.getElementById('userPanel').style.display = 'block';
+  document.getElementById('userName').innerText = currentUser;
   updateBalance();
-  alert(amount + " para gönderildi!");
+}
+
+function updateBalance() {
+  if(currentUser) document.getElementById('balance').innerText = users[currentUser].balance;
+}
+
+// Market
+const products = [
+  {name:"PetSim Huge", price:15},
+  {name:"Valorant VP", price:10},
+  {name:"Fortnite 1000 VP", price:20}
+];
+
+function showMarket() {
+  const panel = document.getElementById('marketPanel');
+  panel.innerHTML = "";
+  panel.style.display = 'block';
+  products.forEach(p => {
+    const btn = document.createElement('button');
+    btn.innerText = `${p.name} (${p.price} Para)`;
+    btn.onclick = () => buy(p.name, p.price);
+    panel.appendChild(btn);
+  });
+}
+
+function buy(item, price) {
+  if(users[currentUser].balance < price) { alert("Yetersiz bakiye"); return; }
+  users[currentUser].balance -= price;
+  updateBalance();
+  alert(item + " alındı!");
+}
+
+// Kullanıcılar arası para gönderme
+function sendMoneyPrompt() {
+  const to = prompt("Kime göndereceksin?");
+  const amount = parseInt(prompt("Ne kadar?"));
+  if(!users[to]) { alert("Kullanıcı yok!"); return; }
+  if(users[currentUser].balance < amount) { alert("Yetersiz bakiye"); return; }
+  users[currentUser].balance -= amount;
+  users[to].balance += amount;
+  updateBalance();
+  alert(amount + " Para gönderildi!");
+}
+
+// Admin fonksiyonları
+function updateUserList() {
+  const div = document.getElementById('userList');
+  div.innerHTML = "";
+  for(const id in users) {
+    div.innerHTML += id + ": " + users[id].balance + " Para<br>";
+  }
+}
+
+function adminAddMoneyPrompt() {
+  const id = document.getElementById('adminUserId').value;
+  const amount = parseInt(document.getElementById('adminAmount').value);
+  if(!users[id]) { alert("Kullanıcı yok!"); return; }
+  users[id].balance += amount;
+  updateUserList();
+  alert(id + " kullanıcısına " + amount + " Para eklendi!");
 }
 </script>
-
 </body>
 </html>
